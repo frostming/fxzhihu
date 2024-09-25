@@ -14,6 +14,8 @@
 https://www.fxzhihu.com/question/586886503/answer/2922442098
 ```
 
+在 URL 末尾添加 `?redirect=no` 可以禁止跳转到知乎原贴。
+
 > 附：复制答案链接的方法
 >
 > 找到答案的发布链接，复制链接即可。

@@ -25,7 +25,7 @@ export default {
 		const answerMatch = path.match(/^\/question\/\d+\/answer\/(\d+)\/?$/);
 		if (answerMatch) {
 			const answerId = answerMatch[1];
-			const body = await answer(answerId, env);
+			const body = await answer(answerId, !['false', 'no'].includes(url.searchParams.get('redirect') || ''), env);
 			return new Response(body, {
 				headers: {
 					'Content-Type': 'text/html',

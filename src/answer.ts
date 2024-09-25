@@ -25,10 +25,13 @@ const template = `
     <meta name="twitter:title" property="og:title" itemprop="name" content="{{title}} - @{{author}} | FxZhihu">
     <meta name="twitter:description" property="og:description" itemprop="description" content="{{excerpt}}">
     <script>
-        window.location.replace("{{url}}");
+        const redirect = {{redirect}};
+        if (redirect) {
+            window.location.replace(redirect);
+        }
     </script>
 </head>
-<body>
+<body style="max-width: 1000px; margin: 0 auto;">
     <header>
         <h1>{{title}}</h1>
         <h2 rel="author">@{{author}}</h2>
@@ -42,7 +45,7 @@ const template = `
 </html>
 `;
 
-export async function answer(id: string, env: Env): Promise<string> {
+export async function answer(id: string, redirect: boolean, env: Env): Promise<string> {
     const url = `https://api.zhihu.com/v4/answers/${id}?include=content%2Cexcerpt%2Cauthor%2Cvoteup_count%2Ccomment_count%2Cquestion%2Ccreated_time`;
     const response = await fetch(url);
     const data = (await response.json()) as Answer;
@@ -56,5 +59,6 @@ export async function answer(id: string, env: Env): Promise<string> {
         .replaceAll('{{comment_count}}', data.comment_count.toString())
         .replaceAll('{{created_time}}', createdTime.toISOString())
         .replaceAll('{{created_time_formatted}}', createdTime.toDateString())
-        .replaceAll('{{url}}', `https://zhihu.com/question/${data.question.id}/answer/${id}`);
+        .replaceAll('{{url}}', `https://zhihu.com/question/${data.question.id}/answer/${id}`)
+        .replaceAll('{{redirect}}', redirect ? 'true' : 'false');
 }
