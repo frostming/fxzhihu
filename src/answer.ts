@@ -39,14 +39,22 @@ const template = `
         <p rel="stats"style="color: #999; font-size: 0.9em;">{{voteup_count}} 👍 / {{comment_count}} 💬</p>
     </header>
     <article>
+        {{question}}
         {{content}}
     </article>
 </body>
 </html>
 `;
 
+const questionTemplate = `
+    <blockquote style="margin: 0; padding: 0.5em 1em; border-left: 4px solid #999; font-size: 0.86em; background: #f9f9f9;">
+        <h2>问题描述</h2>
+        {{question}}
+    </blockquote>
+`;
+
 export async function answer(id: string, redirect: boolean, env: Env): Promise<string> {
-    const url = `https://api.zhihu.com/v4/answers/${id}?include=content%2Cexcerpt%2Cauthor%2Cvoteup_count%2Ccomment_count%2Cquestion%2Ccreated_time`;
+    const url = `https://api.zhihu.com/v4/answers/${id}?include=content%2Cexcerpt%2Cauthor%2Cvoteup_count%2Ccomment_count%2Cquestion%2Ccreated_time%2Cquestion.detail`;
     const response = await fetch(url);
     const data = (await response.json()) as Answer;
     const createdTime = new Date(data.created_time * 1000);
@@ -59,6 +67,7 @@ export async function answer(id: string, redirect: boolean, env: Env): Promise<s
         .replaceAll('{{comment_count}}', data.comment_count.toString())
         .replaceAll('{{created_time}}', createdTime.toISOString())
         .replaceAll('{{created_time_formatted}}', createdTime.toDateString())
+        .replaceAll('{{question}}', data.question.detail.trim().length > 0 ? questionTemplate.replaceAll('{{question}}', fixImagesAndLinks(data.question.detail)) : '')
         .replaceAll('{{url}}', `https://zhihu.com/question/${data.question.id}/answer/${id}`)
         .replaceAll('{{redirect}}', redirect ? 'true' : 'false');
 }
