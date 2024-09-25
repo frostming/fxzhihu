@@ -11,8 +11,24 @@
  * Learn more at https://developers.cloudflare.com/workers/
  */
 
+import { answer } from "./answer";
+
 export default {
 	async fetch(request, env, ctx): Promise<Response> {
-		return new Response('Hello World!');
+		const url = new URL(request.url);
+		const path = url.pathname;
+		const answerMatch = path.match(/^\/question\/\d+\/answer\/(\d+)\/?$/);
+		if (answerMatch) {
+			const answerId = answerMatch[1];
+			const body = await answer(answerId, env);
+			return new Response(body, {
+				headers: {
+					'Content-Type': 'text/html',
+				},
+			});
+		}
+		// Redirect to the same URL under zhihu.com
+		const zhihuUrl = `https://www.zhihu.com${path}`;
+		return Response.redirect(zhihuUrl, 302);
 	},
 } satisfies ExportedHandler<Env>;
