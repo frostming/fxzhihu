@@ -4,6 +4,10 @@ main = "src/index.ts"
 compatibility_date = "2023-05-18"
 compatibility_flags = ["nodejs_compat"]
 
+routes = [
+    { pattern = "www.fxzhihu.com", custom_domain = true },
+]
+
 # Automatically place your workloads in an optimal location to minimize latency.
 # If you are running back-end logic in a Worker, running it closer to your back-end infrastructure
 # rather than the end user may result in better performance.
