@@ -28,10 +28,14 @@ const template = `
     </script>
 </head>
 <body>
-    <h1>{{title}}</h1>
-    <h2>@{{author}}</h2>
-    <p style="color: #999; font-size: 0.9em;">{{voteup_count}} 👍 / {{comment_count}} 💬</p>
-    {{content}}
+    <header>
+        <h1>{{title}}</h1>
+        <h2>@{{author}}</h2>
+        <p style="color: #999; font-size: 0.9em;">{{voteup_count}} 👍 / {{comment_count}} 💬</p>
+    </header>
+    <article>
+        {{content}}
+    </article>
 </body>
 </html>
 `;
