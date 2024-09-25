@@ -11,12 +11,17 @@
  * Learn more at https://developers.cloudflare.com/workers/
  */
 
-import { answer } from "./answer";
+import { answer } from './answer';
+
+const GITHUB_REPO = 'https://github.com/frostming/fxzhihu';
 
 export default {
 	async fetch(request, env, ctx): Promise<Response> {
 		const url = new URL(request.url);
 		const path = url.pathname;
+		if (path === '/') {
+			return Response.redirect(GITHUB_REPO, 302);
+		}
 		const answerMatch = path.match(/^\/question\/\d+\/answer\/(\d+)\/?$/);
 		if (answerMatch) {
 			const answerId = answerMatch[1];
