@@ -27,7 +27,7 @@ const template = `
     <script>
         const redirect = {{redirect}};
         if (redirect) {
-            window.location.replace(redirect);
+            window.location.replace({{url}});
         }
     </script>
 </head>
