@@ -23,6 +23,9 @@ const template = `
     <meta property="twitter:card" content="summary">
     <meta name="twitter:title" property="og:title" itemprop="name" content="{{title}} | FxZhihu">
     <meta name="twitter:description" property="og:description" itemprop="description" content="{{excerpt}}">
+    <script>
+        window.location.replace("{{url}}");
+    </script>
 </head>
 <body>
     <h1>{{title}}</h1>
