@@ -21,6 +21,7 @@ const template = `
 <!DOCTYPE html>
 <html lang="zh">
 <head>
+    <title>{{title}} | FxZhihu</title>
     <meta charset="UTF-8">
     <meta property="og:type" content="website">
     <meta property="og:title" content="{{title}} | FxZhihu">
