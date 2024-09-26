@@ -30,14 +30,23 @@ const template = `
     <meta property="twitter:card" content="summary">
     <meta name="twitter:title" property="og:title" itemprop="name" content="{{title}} | FxZhihu">
     <meta name="twitter:description" property="og:description" itemprop="description" content="{{excerpt}}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
     <script>
         const redirect = {{redirect}};
         if (redirect) {
             window.location.replace("{{url}}");
         }
     </script>
+    <style>
+        .origin_image {
+            width: 100%;
+        }
+        figure {
+            margin:1.4em 0;
+        }
+    </style>
 </head>
-<body style="max-width: 1000px; margin: 0 auto;">
+<body style="max-width: 1000px; margin: 0 auto; padding: 0 1em 0 1em;">
     <header>
         <h1>{{title}}</h1>
         <h2 rel="author">@{{author}}</h2>
