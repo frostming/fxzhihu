@@ -50,3 +50,9 @@ Cloudflare Workers
 ## Telegram 机器人
 
 [@fxzhihu_bot](https://t.me/fxzhihu_bot)
+
+## 油猴脚本
+
+https://greasyfork.org/zh-CN/scripts/510234-zhihu-link-fixer
+
+![油猴脚本](screenshots/userscript.jpg)
