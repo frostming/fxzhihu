@@ -7,6 +7,7 @@ export function fixImagesAndLinks(html: string): string {
         const target = decodeURIComponent(url.searchParams.get('target') || '');
         return `href="${target}"`;
     });
+    result = result.replaceAll(/<u>([\s\S]*?)<\/u>/g, (match, p1) => p1);
     return result;
 }
 
