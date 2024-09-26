@@ -13,6 +13,7 @@
 
 import { answer } from './answer';
 import { article } from './article';
+import { question } from './question';
 
 const GITHUB_REPO = 'https://github.com/frostming/fxzhihu';
 
@@ -37,6 +38,15 @@ export default {
 		if (match) {
 			const articleId = match[1];
 			return new Response(await article(articleId, redirect, env), {
+				headers: {
+					'Content-Type': 'text/html',
+				},
+			});
+		}
+		match = path.match(/^\/question\/(\d+)\/?$/);
+		if (match) {
+			const questionId = match[1];
+			return new Response(await question(questionId, redirect, env), {
 				headers: {
 					'Content-Type': 'text/html',
 				},

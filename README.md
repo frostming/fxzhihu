@@ -14,10 +14,16 @@
 https://www.fxzhihu.com/question/586886503/answer/2922442098
 ```
 
+问题：
+
+```
+https://www.fxzhihu.com/question/586886503
+```
+
 专栏文章：
 
 ```
-https://zhuanlan.fxzhihu.com/p/425664231?redirect=false
+https://zhuanlan.fxzhihu.com/p/425664231
 ```
 
 在 URL 末尾添加 `?redirect=false` 可以禁止跳转到知乎原贴。
@@ -34,7 +40,7 @@ https://zhuanlan.fxzhihu.com/p/425664231?redirect=false
 ## 支持 URL
 
 - [x] 答案
-- [ ] 问题
+- [x] 问题
 - [x] 专栏
 
 ## 部署

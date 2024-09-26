@@ -14,7 +14,7 @@ export type Answer = {
 
 const template = `
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta property="og:type" content="website">
