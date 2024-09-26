@@ -1,10 +1,12 @@
 import { Question } from "./question";
 import { fixImagesAndLinks, renderTemplate } from "./lib";
+
 export type Answer = {
     content: string;
     excerpt: string;
     author: {
         name: string;
+        headline: string;
     };
     voteup_count: number;
     comment_count: number;
@@ -25,6 +27,7 @@ const template = `
     <meta property="twitter:card" content="summary">
     <meta name="twitter:title" property="og:title" itemprop="name" content="{{title}} - @{{author}} | FxZhihu">
     <meta name="twitter:description" property="og:description" itemprop="description" content="{{excerpt}}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
     <script>
         const redirect = {{redirect}};
         if (redirect) {
@@ -32,7 +35,7 @@ const template = `
         }
     </script>
 </head>
-<body style="max-width: 1000px; margin: 0 auto;">
+<body style="max-width: 1000px; margin: 0 auto; padding: 0 1em 0 1em;">
     <header>
         <h1>{{title}}</h1>
         <h2 rel="author">@{{author}}</h2>
@@ -56,15 +59,17 @@ const questionTemplate = `
 
 export async function answer(id: string, redirect: boolean, env: Env): Promise<string> {
     const url = `https://api.zhihu.com/v4/answers/${id}?include=content%2Cexcerpt%2Cauthor%2Cvoteup_count%2Ccomment_count%2Cquestion%2Ccreated_time%2Cquestion.detail`;
+
     const response = await fetch(url);
     const data = (await response.json()) as Answer;
     const createdTime = new Date(data.created_time * 1000);
+    
     return renderTemplate(template, {   
         title: data.question.title,
         url: `https://www.zhihu.com/question/${data.question.id}/answer/${id}`,
         content: fixImagesAndLinks(data.content),
         excerpt: data.excerpt,
-        author: data.author.name,
+        author: data.author.headline,
         created_time: createdTime.toISOString(),
         created_time_formatted: createdTime.toDateString(),
         voteup_count: data.voteup_count.toString(),
