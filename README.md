@@ -46,3 +46,7 @@ https://zhuanlan.fxzhihu.com/p/425664231
 ## 部署
 
 Cloudflare Workers
+
+## Telegram 机器人
+
+[@fxzhihu_bot](https://t.me/fxzhihu_bot)
