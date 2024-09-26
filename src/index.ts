@@ -12,6 +12,7 @@
  */
 
 import { answer } from './answer';
+import { article } from './article';
 
 const GITHUB_REPO = 'https://github.com/frostming/fxzhihu';
 
@@ -19,14 +20,23 @@ export default {
 	async fetch(request, env, ctx): Promise<Response> {
 		const url = new URL(request.url);
 		const path = url.pathname;
+		const redirect = !['false', 'no'].includes(url.searchParams.get('redirect') || '')
 		if (path === '/') {
 			return Response.redirect(GITHUB_REPO, 302);
 		}
-		const answerMatch = path.match(/^\/question\/\d+\/answer\/(\d+)\/?$/);
-		if (answerMatch) {
-			const answerId = answerMatch[1];
-			const body = await answer(answerId, !['false', 'no'].includes(url.searchParams.get('redirect') || ''), env);
-			return new Response(body, {
+		let match = path.match(/^\/question\/\d+\/answer\/(\d+)\/?$/);
+		if (match) {
+			const answerId = match[1];
+			return new Response(await answer(answerId, redirect, env), {
+				headers: {
+					'Content-Type': 'text/html',
+				},
+			});
+		}
+		match = path.match(/^\/p\/(\d+)\/?$/);
+		if (match) {
+			const articleId = match[1];
+			return new Response(await article(articleId, redirect, env), {
 				headers: {
 					'Content-Type': 'text/html',
 				},

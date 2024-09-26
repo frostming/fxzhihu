@@ -14,18 +14,28 @@
 https://www.fxzhihu.com/question/586886503/answer/2922442098
 ```
 
-在 URL 末尾添加 `?redirect=no` 可以禁止跳转到知乎原贴。
+专栏文章：
 
-> 附：复制答案链接的方法
->
-> 找到答案的发布链接，复制链接即可。
-> ![复制答案链接](screenshots/image.png)
+```
+https://zhuanlan.fxzhihu.com/p/425664231?redirect=false
+```
+
+在 URL 末尾添加 `?redirect=false` 可以禁止跳转到知乎原贴。
+
+<details>
+<summary>展开：复制答案链接的方法</summary>
+
+找到答案底部的发布时间，复制链接即可。
+
+![复制答案链接](screenshots/image.png)
+
+</details>
 
 ## 支持 URL
 
 - [x] 答案
 - [ ] 问题
-- [ ] 专栏
+- [x] 专栏
 
 ## 部署
 

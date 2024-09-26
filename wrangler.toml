@@ -6,6 +6,7 @@ compatibility_flags = ["nodejs_compat"]
 
 routes = [
     { pattern = "www.fxzhihu.com", custom_domain = true },
+    { pattern = "zhuanlan.fxzhihu.com", custom_domain = true },
 ]
 
 # Automatically place your workloads in an optimal location to minimize latency.

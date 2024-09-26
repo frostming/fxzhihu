@@ -9,3 +9,9 @@ export function fixImagesAndLinks(html: string): string {
     });
     return result;
 }
+
+export function renderTemplate(template: string, data: Record<string, string>): string {
+    return template.replace(/\{\{([^}]+)\}\}/g, (match, p1) => {
+        return data[p1] || '';
+    });
+}
