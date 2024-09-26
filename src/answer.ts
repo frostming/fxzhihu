@@ -6,7 +6,6 @@ export type Answer = {
     excerpt: string;
     author: {
         name: string;
-        headline: string;
     };
     voteup_count: number;
     comment_count: number;
@@ -69,7 +68,7 @@ export async function answer(id: string, redirect: boolean, env: Env): Promise<s
         url: `https://www.zhihu.com/question/${data.question.id}/answer/${id}`,
         content: fixImagesAndLinks(data.content),
         excerpt: data.excerpt,
-        author: data.author.headline,
+        author: data.author.name,
         created_time: createdTime.toISOString(),
         created_time_formatted: createdTime.toDateString(),
         voteup_count: data.voteup_count.toString(),
