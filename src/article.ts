@@ -71,6 +71,7 @@ export async function article(id: string, redirect: boolean, env: Env): Promise<
     const response = await fetch(url);
     const data = (await response.json()) as Article;
     const createdTime = new Date(data.created * 1000);
+    
     return renderTemplate(template, {
         title: data.title,
         url: `https://zhuanlan.zhihu.com/p/${id}`,
