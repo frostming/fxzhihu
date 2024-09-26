@@ -22,9 +22,11 @@ export default {
 		const url = new URL(request.url);
 		const path = url.pathname;
 		const redirect = !['false', 'no'].includes(url.searchParams.get('redirect') || '')
+		
 		if (path === '/') {
 			return Response.redirect(GITHUB_REPO, 302);
 		}
+
 		let match = path.match(/^\/question\/\d+\/answer\/(\d+)\/?$/);
 		if (match) {
 			const answerId = match[1];
@@ -34,6 +36,7 @@ export default {
 				},
 			});
 		}
+		
 		match = path.match(/^\/p\/(\d+)\/?$/);
 		if (match) {
 			const articleId = match[1];
@@ -43,6 +46,7 @@ export default {
 				},
 			});
 		}
+
 		match = path.match(/^\/question\/(\d+)\/?$/);
 		if (match) {
 			const questionId = match[1];
@@ -52,6 +56,7 @@ export default {
 				},
 			});
 		}
+
 		// Redirect to the same URL under zhihu.com
 		const zhihuUrl = `https://www.zhihu.com${path}`;
 		return Response.redirect(zhihuUrl, 302);

@@ -54,8 +54,10 @@ export async function question(id: string, redirect: boolean, env: Env): Promise
             'user-agent': 'node'
         },
     });
+
 	const data = (await response.json()) as Question;
     const createdTime = new Date(data.created * 1000);
+
 	return renderTemplate(template, {
 		title: data.title,
 		author: data.author.name,
