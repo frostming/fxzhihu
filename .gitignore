@@ -170,3 +170,9 @@ dist
 
 .dev.vars
 .wrangler/
+
+
+# direnv
+
+.direnv
+flake.lock
