@@ -33,6 +33,14 @@ const template = `
             window.location.replace("{{url}}");
         }
     </script>
+    <style>
+        img {
+            width: 100%;
+        }
+        figure {
+            margin: 1.4em 0;
+        }
+    </style>
 </head>
 <body style="max-width: 1000px; margin: 0 auto; padding: 0 1em 0 1em;">
     <header>
@@ -58,7 +66,6 @@ const questionTemplate = `
 
 export async function answer(id: string, redirect: boolean, env: Env): Promise<string> {
     const url = `https://api.zhihu.com/v4/answers/${id}?include=content%2Cexcerpt%2Cauthor%2Cvoteup_count%2Ccomment_count%2Cquestion%2Ccreated_time%2Cquestion.detail`;
-
     const response = await fetch(url);
     const data = (await response.json()) as Answer;
     const createdTime = new Date(data.created_time * 1000);
