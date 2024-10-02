@@ -58,10 +58,11 @@ const template = `
 `;
 
 const questionTemplate = `
-    <blockquote style="margin: 0; padding: 0.5em 1em; border-left: 4px solid #999; font-size: 0.86em; background: #f9f9f9;">
+    <div style="margin: 0; padding: 0.5em 1em; border-left: 4px solid #999; font-size: 0.86em; background: #f9f9f9;">
         <h2>问题描述</h2>
         {{question}}
-    </blockquote>
+    </div>
+    <hr>
 `;
 
 export async function answer(id: string, redirect: boolean, env: Env): Promise<string> {
