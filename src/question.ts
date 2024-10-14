@@ -5,12 +5,12 @@ export type Question = {
 	id: number;
 	title: string;
 	detail: string;
-    excerpt: string;
-    created: number;
-    answer_count: number;
-    author: {
-        name: string;
-    };
+	excerpt: string;
+	created: number;
+	answer_count: number;
+	author: {
+		name: string;
+	};
 };
 
 const template = renderTemplate`
@@ -49,14 +49,14 @@ const template = renderTemplate`
 
 export async function question(id: string, redirect: boolean, env: Env): Promise<string> {
 	const response = await fetch(`https://api.zhihu.com/questions/${id}?include=detail%2Cexcerpt%2Canswer_count%2Cauthor`, {
-        headers: {
-            cookie: `__zse_ck=${env.ZSE_CK}`,
-            'user-agent': 'node'
-        },
-    });
+		headers: {
+			cookie: `__zse_ck=${env.ZSE_CK}`,
+			'user-agent': 'node'
+		},
+	});
 
 	const data = (await response.json()) as Question;
-    const createdTime = new Date(data.created * 1000);
+	const createdTime = new Date(data.created * 1000);
 
 	return template({
 		title: data.title,
@@ -65,7 +65,7 @@ export async function question(id: string, redirect: boolean, env: Env): Promise
 		created_time_formatted: createdTime.toDateString(),
 		answer_count: data.answer_count.toString(),
 		content: data.detail,
-        redirect: redirect ? 'true' : 'false',
-        url: `https://www.zhihu.com/question/${id}`,
+		redirect: redirect ? 'true' : 'false',
+		url: new URL(id, `https://www.zhihu.com/question/`).href,
 	});
 }

@@ -66,24 +66,24 @@ const questionTemplate = renderTemplate`
 `;
 
 export async function answer(id: string, redirect: boolean, env: Env): Promise<string> {
-    const url = `https://api.zhihu.com/v4/answers/${id}?include=content%2Cexcerpt%2Cauthor%2Cvoteup_count%2Ccomment_count%2Cquestion%2Ccreated_time%2Cquestion.detail`;
-    const response = await fetch(url);
-    const data = (await response.json()) as Answer;
-    const createdTime = new Date(data.created_time * 1000);
+	const url = `https://api.zhihu.com/v4/answers/${id}?include=content%2Cexcerpt%2Cauthor%2Cvoteup_count%2Ccomment_count%2Cquestion%2Ccreated_time%2Cquestion.detail`;
+	const response = await fetch(url);
+	const data = (await response.json()) as Answer;
+	const createdTime = new Date(data.created_time * 1000);
 
-    return template({
-        title: data.question.title,
-        url: `https://www.zhihu.com/question/${data.question.id}/answer/${id}`,
-        content: fixImagesAndLinks(data.content),
-        excerpt: data.excerpt,
-        author: data.author.name,
-        created_time: createdTime.toISOString(),
-        created_time_formatted: createdTime.toDateString(),
-        voteup_count: data.voteup_count.toString(),
-        comment_count: data.comment_count.toString(),
-        question: data.question.detail.trim().length > 0 ? questionTemplate({
-            question: fixImagesAndLinks(data.question.detail),
-        }) : '',
-        redirect: redirect ? 'true' : 'false',
-    });
+	return template({
+		title: data.question.title,
+		url: new URL(`${data.question.id}/answer/${id}`, `https://www.zhihu.com/question/`).href,
+		content: fixImagesAndLinks(data.content),
+		excerpt: data.excerpt,
+		author: data.author.name,
+		created_time: createdTime.toISOString(),
+		created_time_formatted: createdTime.toDateString(),
+		voteup_count: data.voteup_count.toString(),
+		comment_count: data.comment_count.toString(),
+		question: data.question.detail.trim().length > 0 ? questionTemplate({
+			question: fixImagesAndLinks(data.question.detail),
+		}) : '',
+		redirect: redirect ? 'true' : 'false',
+	});
 }

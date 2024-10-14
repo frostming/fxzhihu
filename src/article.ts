@@ -1,20 +1,21 @@
 import { fixImagesAndLinks, renderTemplate } from "./lib";
 
 export type Article = {
-    title: string;
-    content: string;
-    excerpt: string;
-    author: {
-        name: string;
-    };
-    created: number;
-    voteup_count: number;
-    comment_count: number;
-    image_url: string;
-    column: {
-        title: string;
-        description: string;
-    };
+	title: string;
+	content: string;
+	excerpt: string;
+	author: {
+		name: string;
+		url: string;
+	};
+	created: number;
+	voteup_count: number;
+	comment_count: number;
+	image_url: string;
+	column: {
+		title: string;
+		description: string;
+	};
 }
 
 const template = renderTemplate`
@@ -49,7 +50,9 @@ const template = renderTemplate`
 <body style="max-width: 1000px; margin: 0 auto; padding: 0 1em 0 1em;">
     <header>
         <h1>${"title"}</h1>
-        <h2 rel="author">@${"author"}</h2>
+        <h2 rel="author">
+		<a href="${"author_url"}">@${"author"}</a>
+		</h2>
         <time datetime="${"created_time"}">发表于 ${"created_time_formatted"}</time>
         <p rel="stats"style="color: #999; font-size: 0.9em;">${"voteup_count"} 👍 / ${"comment_count"} 💬</p>
     </header>
@@ -67,23 +70,24 @@ const template = renderTemplate`
 `;
 
 export async function article(id: string, redirect: boolean, env: Env): Promise<string> {
-    const url = `https://api.zhihu.com/article/${id}`;
-    const response = await fetch(url);
-    const data = (await response.json()) as Article;
-    const createdTime = new Date(data.created * 1000);
+	const url = new URL(id, `https://api.zhihu.com/article/`);
+	const response = await fetch(url);
+	const data = (await response.json()) as Article;
+	const createdTime = new Date(data.created * 1000);
 
-    return template({
-        title: data.title,
-        url: `https://zhuanlan.zhihu.com/p/${id}`,
-        content: fixImagesAndLinks(data.content),
-        excerpt: data.excerpt,
-        author: data.author.name,
-        created_time: createdTime.toISOString(),
-        created_time_formatted: createdTime.toDateString(),
-        voteup_count: data.voteup_count.toString(),
-        comment_count: data.comment_count.toString(),
-        column_title: data.column.title,
-        column_description: data.column.description,
-        redirect: redirect ? 'true' : 'false',
-    });
+	return template({
+		title: data.title,
+		url: new URL(id, `https://zhuanlan.zhihu.com/p/`).href,
+		content: fixImagesAndLinks(data.content),
+		excerpt: data.excerpt,
+		author: data.author.name,
+		created_time: createdTime.toISOString(),
+		created_time_formatted: createdTime.toDateString(),
+		voteup_count: data.voteup_count.toString(),
+		comment_count: data.comment_count.toString(),
+		column_title: data.column.title,
+		column_description: data.column.description,
+		redirect: redirect ? 'true' : 'false',
+		author_url: data.author.url.replace("api.", ""),
+	});
 }
