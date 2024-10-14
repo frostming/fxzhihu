@@ -75,4 +75,4 @@ pnpm dev
 
 专栏链接是 `https://zhuanlan.zhihu.com/p/NUMBER`, 访问 <http://localhost:8787/p/NUMBER?redirect=no> 就能看到效果
 
-回答是 `https://www.fxzhihu.com/question/N1/answer/N2`，访问 <http://localhost:8787/question/N1/answer/N2?redirect=no> 就能看到效果
+回答是 `https://www.zhihu.com/question/N1/answer/N2`，访问 <http://localhost:8787/question/N1/answer/N2?redirect=no> 就能看到效果
