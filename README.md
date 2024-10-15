@@ -64,3 +64,15 @@ https://greasyfork.org/zh-CN/scripts/510234-zhihu-link-fixer
 虽然 `redirect=false` 可以生成一个静态的网页允许非登录用户阅读全文，然而，这个项目主要是方便在 Telegram 中分享知乎的内容，这时 Telegram 会生成 Instant View 方便用户阅读。而用户点击链接时，通常是对原贴原作感兴趣，我希望尊重原创，所以默认重定向到知乎原链接，所以:
 
 **这个项目不是知乎的镜像工具，不会保存任何原创的内容。**
+
+---
+
+## 开发
+
+```
+pnpm dev
+```
+
+专栏链接是 `https://zhuanlan.zhihu.com/p/NUMBER`, 访问 <http://localhost:8787/p/NUMBER?redirect=no> 就能看到效果
+
+回答是 `https://www.zhihu.com/question/N1/answer/N2`，访问 <http://localhost:8787/question/N1/answer/N2?redirect=no> 就能看到效果
