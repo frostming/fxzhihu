@@ -52,7 +52,7 @@ const template = renderTemplate`
 <body style="max-width: 1000px; margin: 0 auto; padding: 0 1em 0 1em;">
     <header>
 	    <img class="origin_image" src="${"image_url"}"/>
-        <h1>${"title"}</h1>
+        <h1><a href="${"url"}">${"title"}</a></h1>
 		<img src="${"avatar_url"}"/>
         <h2 rel="author">
 		<a href="${"author_url"}" target="_blank">@${"author"}</a>

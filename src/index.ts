@@ -23,8 +23,8 @@ export default {
 		const path = url.pathname;
 		let redirect = !['false', 'no'].includes(url.searchParams.get('redirect') || '');
 		// Redirect unless the request is coming from Telegram
-		const userAgent = request.headers.get('User-Agent') || '';
-		if (!userAgent.toLowerCase().includes('telegram')) {
+		const referer = request.headers.get('Referer') || '';
+		if (!referer.toLowerCase().includes('https://t.me')) {
 			redirect = false;
 		}
 

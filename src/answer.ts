@@ -47,7 +47,7 @@ const template = renderTemplate`
 </head>
 <body style="max-width: 1000px; margin: 0 auto; padding: 0 1em 0 1em;">
     <header>
-        <h1>${"title"}</h1>
+        <h1><a href="${"url"}">${"title"}</a></h1>
         <h2 rel="author">
 		<a href="${"author_url"}" target="_blank">@${"author"}</a>
 		</h2>

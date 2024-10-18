@@ -35,7 +35,7 @@ const template = renderTemplate`
 </head>
 <body style="max-width: 1000px; margin: 0 auto;">
     <header>
-        <h1>${"title"}</h1>
+        <h1><a href="${"url"}">${"title"}</a></h1>
         <h2 rel="author">@${"author"}</h2>
         <time datetime="${"created_time"}">发表于 ${"created_time_formatted"}</time>
         <p rel="stats"style="color: #999; font-size: 0.9em;">${"answer_count"} 个回答</p>
