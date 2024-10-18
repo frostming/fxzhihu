@@ -2,18 +2,18 @@ import { Question } from "./question";
 import { fixImagesAndLinks, renderTemplate } from "./lib";
 
 export type Answer = {
-    content: string;
-    excerpt: string;
-    author: {
-        name: string;
+	content: string;
+	excerpt: string;
+	author: {
+		name: string;
 		url: string;
 		headline: string;
 		avatar_url: string;
-    };
-    voteup_count: number;
-    comment_count: number;
-    question: Question;
-    created_time: number;
+	};
+	voteup_count: number;
+	comment_count: number;
+	question: Question;
+	created_time: number;
 }
 
 const template = renderTemplate`

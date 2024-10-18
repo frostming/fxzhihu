@@ -36,6 +36,15 @@ export default {
 				},
 			});
 		}
+		match = path.match(/^\/answer\/(\d+)\/?$/);
+		if (match) {
+			const answerId = match[1];
+			return new Response(await answer(answerId, redirect, env), {
+				headers: {
+					'Content-Type': 'text/html',
+				},
+			});
+		}
 
 		match = path.match(/^\/p\/(\d+)\/?$/);
 		if (match) {
