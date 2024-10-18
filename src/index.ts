@@ -32,6 +32,15 @@ export default {
 			return Response.redirect(GITHUB_REPO, 302);
 		}
 
+		if (path === '/robots.txt') {
+			return new Response(`User-agent: *
+Disallow: /
+Allow: /question/*
+Allow: /p/*
+Allow: /answer/*
+`);
+		}
+
 		let match = path.match(/^(?:\/question\/\d+)?\/answer\/(\d+)\/?$/);
 		if (match) {
 			const answerId = match[1];
