@@ -32,16 +32,7 @@ export default {
 			return Response.redirect(GITHUB_REPO, 302);
 		}
 
-		let match = path.match(/^\/question\/\d+\/answer\/(\d+)\/?$/);
-		if (match) {
-			const answerId = match[1];
-			return new Response(await answer(answerId, redirect, env), {
-				headers: {
-					'Content-Type': 'text/html',
-				},
-			});
-		}
-		match = path.match(/^\/answer\/(\d+)\/?$/);
+		let match = path.match(/^(?:\/question\/\d+)?\/answer\/(\d+)\/?$/);
 		if (match) {
 			const answerId = match[1];
 			return new Response(await answer(answerId, redirect, env), {
