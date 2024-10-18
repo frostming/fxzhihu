@@ -21,7 +21,12 @@ export default {
 	async fetch(request, env, ctx): Promise<Response> {
 		const url = new URL(request.url);
 		const path = url.pathname;
-		const redirect = !['false', 'no'].includes(url.searchParams.get('redirect') || '')
+		let redirect = !['false', 'no'].includes(url.searchParams.get('redirect') || '');
+		// Redirect unless the request is coming from Telegram
+		const userAgent = request.headers.get('User-Agent') || '';
+		if (!userAgent.toLowerCase().includes('telegram')) {
+			redirect = false;
+		}
 
 		if (path === '/') {
 			return Response.redirect(GITHUB_REPO, 302);
