@@ -11,7 +11,7 @@ export function fixImagesAndLinks(html: string): string {
 	return result;
 }
 
-export function renderTemplate<
+export function createTemplate<
 	K extends readonly string[]
 >(strings: TemplateStringsArray, ...keys: K) {
 	return (dict: Record<K[number], string>) => {

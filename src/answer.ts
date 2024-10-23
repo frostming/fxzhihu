@@ -1,5 +1,5 @@
 import { Question } from "./question";
-import { fixImagesAndLinks, renderTemplate } from "./lib";
+import { fixImagesAndLinks, createTemplate } from "./lib";
 
 export type Answer = {
 	content: string;
@@ -16,7 +16,7 @@ export type Answer = {
 	created_time: number;
 }
 
-const template = renderTemplate`
+const template = createTemplate`
 <!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -45,17 +45,14 @@ const template = renderTemplate`
         }
         .author {
             display: flex;
+            gap: 1em;
         }
-
         .avatar {
             display: flex;
             flex-direction: column;
             justify-content: center;
-            /*  头像垂直居中 */
             align-items: center;
-            /*  头像水平居中  */
         }
-
     </style>
 </head>
 <body style="max-width: 1000px; margin: 0 auto; padding: 0 1em 0 1em;">
@@ -83,7 +80,7 @@ const template = renderTemplate`
 </html>
 `;
 
-const questionTemplate = renderTemplate`
+const questionTemplate = createTemplate`
     <div style="margin: 0; padding: 0.5em 1em; border-left: 4px solid #999; font-size: 0.86em; background: #f9f9f9;">
         <h2>问题描述</h2>
         ${"question"}

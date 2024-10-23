@@ -1,4 +1,4 @@
-import { renderTemplate } from "./lib";
+import { createTemplate } from "./lib";
 
 export type Question = {
 	type: 'question';
@@ -13,7 +13,7 @@ export type Question = {
 	};
 };
 
-const template = renderTemplate`
+const template = createTemplate`
 <!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -67,5 +67,6 @@ export async function question(id: string, redirect: boolean, env: Env): Promise
 		content: data.detail,
 		redirect: redirect ? 'true' : 'false',
 		url: new URL(id, `https://www.zhihu.com/question/`).href,
+		excerpt: data.excerpt,
 	});
 }
