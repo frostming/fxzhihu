@@ -1,5 +1,5 @@
 import { Question } from "./question";
-import { fixImagesAndLinks, createTemplate } from "./lib";
+import { fixImagesAndLinks, createTemplate, extractReference } from "./lib";
 
 export type Answer = {
 	content: string;
@@ -75,6 +75,7 @@ const template = createTemplate`
     <article>
         ${"question"}
         ${"content"}
+        ${"reference"}
     </article>
 </body>
 </html>
@@ -98,6 +99,7 @@ export async function answer(id: string, redirect: boolean, env: Env): Promise<s
 		title: data.question.title,
 		url: new URL(`${data.question.id}/answer/${id}`, `https://www.zhihu.com/question/`).href,
 		content: fixImagesAndLinks(data.content),
+		reference: extractReference(data.content),
 		excerpt: data.excerpt,
 		author: data.author.name,
 		created_time: createdTime.toISOString(),
