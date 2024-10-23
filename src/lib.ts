@@ -11,11 +11,13 @@ export function fixImagesAndLinks(html: string): string {
 	return result;
 }
 
-export function renderTemplate(strings: TemplateStringsArray, ...keys: string[]) {
-	return (dict: Record<string, string>) => {
+export function renderTemplate<
+	K extends readonly string[]
+>(strings: TemplateStringsArray, ...keys: K) {
+	return (dict: Record<K[number], string>) => {
 		const result = [strings[0]];
 		keys.forEach((key, i) => {
-			result.push(dict[key], strings[i + 1]);
+			result.push(dict[key as K[number]], strings[i + 1]);
 		});
 		return result.join("");
 	};
