@@ -1,4 +1,4 @@
-import { fixImagesAndLinks, createTemplate } from "./lib";
+import { fixImagesAndLinks, createTemplate, extractReference } from "./lib";
 
 export type Article = {
 	title: string;
@@ -80,6 +80,7 @@ const template = createTemplate`
     </header>
     <article>
         ${"content"}
+        ${"reference"}
         <hr>
         <div class="column" style="margin: 1em 0; padding: 0.5em 1em; border: 2px solid #999; border-radius: 5px;">
             <h2>专栏：${"column_title"}</h2>
@@ -100,6 +101,7 @@ export async function article(id: string, redirect: boolean, env: Env): Promise<
 		title: data.title,
 		url: new URL(id, `https://zhuanlan.zhihu.com/p/`).href,
 		content: fixImagesAndLinks(data.content),
+		reference: extractReference(data.content),
 		excerpt: data.excerpt,
 		author: data.author.name,
 		created_time: createdTime.toISOString(),
