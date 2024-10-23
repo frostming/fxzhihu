@@ -68,21 +68,21 @@ const template = renderTemplate`
 <body style="max-width: 1000px; margin: 0 auto; padding: 0 1em 0 1em;">
     <header>
         <h1><a href="${"url"}">${"title"}</a></h1>
-		<div class="container">
-			<div class="avatar">
-				<img class="origin" src="${"avatar_url"}" />
-			</div>
-			<div class="content">
-				<div class="top">
-					<h2 rel="author">
-						<a href="${"author_url"}" target="_blank">@${"author"}</a>
-					</h2>
-				</div>
-				<div class="bottom">
-					<p> ${"headline"} </p>
-				</div>
-			</div>
-		</div>
+        <div class="container">
+            <div class="avatar">
+                <img class="origin" src="${"avatar_url"}" />
+            </div>
+            <div class="content">
+                <div class="top">
+                    <h2 rel="author">
+                        <a href="${"author_url"}" target="_blank">@${"author"}</a>
+                    </h2>
+                </div>
+                <div class="bottom">
+                    <p> ${"headline"} </p>
+                </div>
+            </div>
+        </div>
         <time datetime="${"created_time"}">发表于 ${"created_time_formatted"}</time>
         <p rel="stats"style="color: #999; font-size: 0.9em;">${"voteup_count"} 👍 / ${"comment_count"} 💬</p>
     </header>
