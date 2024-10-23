@@ -43,24 +43,17 @@ const template = renderTemplate`
         figure {
             margin: 1.4em 0;
         }
-        .container {
+        .author {
             display: flex;
         }
 
         .avatar {
             display: flex;
             flex-direction: column;
-            justify-content: center; /*  头像垂直居中 */
-            align-items: center;     /*  头像水平居中  */
-        }
-
-        .content {
-            margin-left: 10px; /*  与头像的间距 */
-            flex: 1; /* 关键：让 content 占据剩余空间 */
-        }
-
-        .top, .bottom {
-            flex: 1; /*  让顶部和底部内容均分高度  */
+            justify-content: center;
+            /*  头像垂直居中 */
+            align-items: center;
+            /*  头像水平居中  */
         }
 
     </style>
@@ -72,15 +65,11 @@ const template = renderTemplate`
             <div class="avatar">
                 <img class="origin" src="${"avatar_url"}" />
             </div>
-            <div class="content">
-                <div class="top">
-                    <h2 rel="author">
-                        <a href="${"author_url"}" target="_blank">@${"author"}</a>
-                    </h2>
-                </div>
-                <div class="bottom">
-                    <p> ${"headline"} </p>
-                </div>
+            <div>
+                <h2 rel="author">
+                    <a href="${"author_url"}" target="_blank">@${"author"}</a>
+                </h2>
+                <p> ${"headline"} </p>
             </div>
         </div>
         <time datetime="${"created_time"}">发表于 ${"created_time_formatted"}</time>
