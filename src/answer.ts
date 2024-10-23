@@ -43,25 +43,25 @@ const template = renderTemplate`
         figure {
             margin: 1.4em 0;
         }
-		.container {
-			display: flex;
-		}
+        .container {
+            display: flex;
+        }
 
-		.avatar {
-			display: flex;
-			flex-direction: column;
-			justify-content: center; /*  头像垂直居中 */
-			align-items: center;     /*  头像水平居中  */
-		}
+        .avatar {
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /*  头像垂直居中 */
+            align-items: center;     /*  头像水平居中  */
+        }
 
-		.content {
-			margin-left: 10px; /*  与头像的间距 */
-			flex: 1; /* 关键：让 content 占据剩余空间 */
-		}
+        .content {
+            margin-left: 10px; /*  与头像的间距 */
+            flex: 1; /* 关键：让 content 占据剩余空间 */
+        }
 
-		.top, .bottom {
-			flex: 1; /*  让顶部和底部内容均分高度  */
-		}
+        .top, .bottom {
+            flex: 1; /*  让顶部和底部内容均分高度  */
+        }
 
     </style>
 </head>
