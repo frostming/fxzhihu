@@ -68,7 +68,7 @@ const template = renderTemplate`
 <body style="max-width: 1000px; margin: 0 auto; padding: 0 1em 0 1em;">
     <header>
         <h1><a href="${"url"}">${"title"}</a></h1>
-        <div class="container">
+        <div class="author">
             <div class="avatar">
                 <img class="origin" src="${"avatar_url"}" />
             </div>
