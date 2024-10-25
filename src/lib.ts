@@ -22,3 +22,23 @@ export function createTemplate<
 		return result.join("");
 	};
 }
+
+export function extractReference(html: string): string {
+	const referenceRegex = /<sup[^>]*data-text="([^"]*)"[^>]*data-url="([^"]*)"[^>]*data-numero="([^"]*)"[^>]*>/g;
+	const references = new Map<string, { text: string; url: string }>();
+
+	let match;
+	while ((match = referenceRegex.exec(html)) !== null) {
+		const [, text, url, numero] = match;
+		references.set(numero, { text, url });
+	}
+
+	let referenceList = Array.from(references.entries())
+		.sort(([a], [b]) => parseInt(a) - parseInt(b))
+		.map(([index, { text, url }]) => `${index}. ${text} <a href="${url}">${url}</a>`);
+
+	if (referenceList.length > 0) {
+		return `<hr><section><h2>参考</h2>${referenceList.join("<br>")}</section>`;
+	}
+	return "";
+}
