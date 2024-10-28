@@ -47,6 +47,12 @@ const template = createTemplate`
         figure {
             margin:1.4em 0;
         }
+        figure img {
+            width: 100%;
+        }
+        img {
+            vertical-align: middle;
+        }
 		.author {
             display: flex;
             gap: 1em;

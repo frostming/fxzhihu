@@ -37,7 +37,10 @@ const template = createTemplate`
         }
     </script>
     <style>
-        img:not(.origin) {
+        img {
+            vertical-align: middle;
+        }
+        figure img {
             width: 100%;
         }
         figure {
