@@ -51,10 +51,11 @@ const template = createTemplate`
             gap: 1em;
         }
         .avatar {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            width: 100px;
+            height: 100px;
+        }
+        .author > div {
+            flex: 1;
         }
     </style>
 </head>
@@ -62,9 +63,7 @@ const template = createTemplate`
     <header>
         <h1><a href="${"url"}">${"title"}</a></h1>
         <div class="author">
-            <div class="avatar">
-                <img class="origin" src="${"avatar_url"}" />
-            </div>
+            <img class="avatar" src="${"avatar_url"}" />
             <div>
                 <h2 rel="author">
                     <a href="${"author_url"}" target="_blank">@${"author"}</a>
