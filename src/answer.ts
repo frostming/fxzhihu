@@ -26,6 +26,7 @@ const template = createTemplate`
     <meta property="og:title" content="${"title"} - @${"author"} | FxZhihu">
     <meta property="og:site_name" content="FxZhihu / Fixup Zhihu">
     <meta property="og:url" content="${"url"}">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/yue.css@0.4.0/yue.css">
     <meta property="twitter:card" content="summary">
     <meta name="twitter:title" property="og:title" itemprop="name" content="${"title"} - @${"author"} | FxZhihu">
     <meta name="twitter:description" property="og:description" itemprop="description" content="${"excerpt"}">
@@ -59,7 +60,7 @@ const template = createTemplate`
         }
     </style>
 </head>
-<body style="max-width: 1000px; margin: 0 auto; padding: 0 1em 0 1em;">
+<body style="max-width: 1000px; margin: 0 auto; padding: 0 1em 0 1em;" class="yue">
     <header>
         <h1><a href="${"url"}">${"title"}</a></h1>
         <div class="author">
@@ -95,6 +96,7 @@ export async function answer(id: string, redirect: boolean, env: Env): Promise<s
 	const url = `https://api.zhihu.com/v4/answers/${id}?include=content%2Cexcerpt%2Cauthor%2Cvoteup_count%2Ccomment_count%2Cquestion%2Ccreated_time%2Cquestion.detail`;
 	const response = await fetch(url);
 	const data = (await response.json()) as Answer;
+	console.log(data);
 	const createdTime = new Date(data.created_time * 1000);
 
 	return template({
