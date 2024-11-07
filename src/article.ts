@@ -58,7 +58,7 @@ const template = createTemplate`
             display: flex;
             gap: 1em;
         }
-        .avatar {
+        #avatar {
             width: 100px;
             height: 100px;
         }
@@ -73,7 +73,7 @@ const template = createTemplate`
 	    <img class="origin_image" src="${"image_url"}"/>
         <h1><a href="${"url"}">${"title"}</a></h1>
 		<div class="author">
-            <img class="avatar" src="${"avatar_url"}" />
+            <img class="avatar" id="avatar" src="${"avatar_url"}" />
             <div>
                 <h2 rel="author">
                     <a href="${"author_url"}" target="_blank">@${"author"}</a>
