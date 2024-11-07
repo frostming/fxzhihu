@@ -51,7 +51,7 @@ const template = createTemplate`
             display: flex;
             gap: 1em;
         }
-        .avatar {
+        avatar {
             width: 100px;
             height: 100px;
         }
@@ -96,7 +96,6 @@ export async function answer(id: string, redirect: boolean, env: Env): Promise<s
 	const url = `https://api.zhihu.com/v4/answers/${id}?include=content%2Cexcerpt%2Cauthor%2Cvoteup_count%2Ccomment_count%2Cquestion%2Ccreated_time%2Cquestion.detail`;
 	const response = await fetch(url);
 	const data = (await response.json()) as Answer;
-	console.log(data);
 	const createdTime = new Date(data.created_time * 1000);
 
 	return template({
