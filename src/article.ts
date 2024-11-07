@@ -59,8 +59,8 @@ const template = createTemplate`
             gap: 1em;
         }
         .avatar {
-            width: 100px;
-            height: 100px;
+            width: 100px !important;
+            height: 100px !important;
         }
         .author > div {
             flex: 1;
