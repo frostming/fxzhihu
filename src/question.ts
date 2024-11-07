@@ -56,7 +56,7 @@ export async function question(id: string, redirect: boolean, env: Env): Promise
 		},
 	});
 
-	const data = (await response.json()) as Question;
+	const data = await response.json<Question>();
 	const createdTime = new Date(data.created * 1000);
 
 	return template({
