@@ -65,6 +65,9 @@ const template = createTemplate`
         .author > div {
             flex: 1;
         }
+        a[data-draft-type="link-card"] {
+           display: block;
+        }
     </style>
     </style>
 </head>

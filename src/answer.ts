@@ -58,6 +58,9 @@ const template = createTemplate`
         .author > div {
             flex: 1;
         }
+        a[data-draft-type="link-card"] {
+           display: block;
+        }
     </style>
 </head>
 <body style="max-width: 1000px; margin: 0 auto; padding: 0 1em 0 1em;" class="yue">
