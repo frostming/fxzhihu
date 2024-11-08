@@ -1,3 +1,23 @@
+/**
+ * Transforms Zhihu URLs to FxZhihu URLs anywhere in the text
+ */
+function transformZhihuUrls(text: string) {
+	// Regular expressions for matching three types of Zhihu URLs
+	const zhihuQuestionRegex = /https?:\/\/(?:www\.)?zhihu\.com\/(question\/\d+\/answer\/\d+)/g;
+	const zhihuAnswerRegex = /https?:\/\/(?:www\.)?zhihu\.com\/(answer\/\d+)/g;
+	const zhuanlanRegex = /https?:\/\/(?:zhuanlan\.)?zhihu\.com\/(p\/\d+)/g;
+
+	// Transform www.zhihu.com/question/xxx/answer/xxx URLs
+	return text.replace(zhihuQuestionRegex, 'https://www.fxzhihu.com/$1')
+
+		// Transform www.zhihu.com/answer/xxx URLs
+		.replace(zhihuAnswerRegex, 'https://www.fxzhihu.com/$1')
+
+		// Transform zhuanlan.zhihu.com/p/xxx URLs
+		.replace(zhuanlanRegex, 'https://zhuanlan.fxzhihu.com/$1');
+
+}
+
 export function fixImagesAndLinks(html: string): string {
 	let result = html.replaceAll(/<img [^>]+? data-actualsrc="([^>]+?)"[^>]+?(\/?>)/g, (match, p1, p2) => {
 		return `<img src="${p1}"${p2}`;
@@ -7,6 +27,7 @@ export function fixImagesAndLinks(html: string): string {
 		const target = decodeURIComponent(url.searchParams.get('target') || '');
 		return `href="${target}"`;
 	});
+	result = transformZhihuUrls(result);
 	result = result.replaceAll(/<u>([\s\S]*?)<\/u>/g, (match, p1) => p1);
 	return result;
 }
