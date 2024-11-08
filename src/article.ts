@@ -100,7 +100,7 @@ const template = createTemplate`
 export async function article(id: string, redirect: boolean, env: Env): Promise<string> {
 	const url = new URL(id, `https://api.zhihu.com/article/`);
 	const response = await fetch(url);
-	const data = (await response.json()) as Article;
+	const data = await response.json<Article>();
 	const createdTime = new Date(data.created * 1000);
 
 	return template({
