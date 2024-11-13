@@ -42,3 +42,13 @@ export function extractReference(html: string): string {
 	}
 	return "";
 }
+
+
+export class FetchError extends Error {
+    response?: Response;
+
+    constructor(message: string, response?: Response) {
+        super(message);
+        this.response = response;
+    }
+}

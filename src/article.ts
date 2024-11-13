@@ -1,4 +1,4 @@
-import { fixImagesAndLinks, createTemplate, extractReference } from "./lib";
+import { fixImagesAndLinks, createTemplate, extractReference, FetchError } from "./lib";
 
 export type Article = {
 	title: string;
@@ -73,7 +73,7 @@ const template = createTemplate`
 </head>
 <body style="max-width: 1000px; margin: 0 auto; padding: 0 1em 0 1em;" class="yue">
     <header>
-	    <img class="origin_image" src="${"image_url"}"/>
+		<img class="origin_image" src="${"image_url"}"/>
         <h1><a href="${"url"}">${"title"}</a></h1>
 		<div class="author">
             <img class="avatar" id="avatar" src="${"avatar_url"}" />
@@ -103,6 +103,9 @@ const template = createTemplate`
 export async function article(id: string, redirect: boolean, env: Env): Promise<string> {
 	const url = new URL(id, `https://api.zhihu.com/article/`);
 	const response = await fetch(url);
+	if (!response.ok) {
+		throw new FetchError(response.statusText, response);
+	}
 	const data = await response.json<Article>();
 	const createdTime = new Date(data.created * 1000);
 
