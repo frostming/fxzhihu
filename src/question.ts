@@ -1,4 +1,4 @@
-import { createTemplate } from "./lib";
+import { createTemplate, FetchError } from "./lib";
 
 export type Question = {
 	type: 'question';
@@ -55,6 +55,9 @@ export async function question(id: string, redirect: boolean, env: Env): Promise
 			'user-agent': 'node'
 		},
 	});
+	if (!response.ok) {
+		throw new FetchError(response.statusText, response);
+	}
 
 	const data = await response.json<Question>();
 	const createdTime = new Date(data.created * 1000);

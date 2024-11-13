@@ -44,31 +44,43 @@ Allow: /answer/*
 		let match = path.match(/^(?:\/question\/\d+)?\/answer\/(\d+)\/?$/);
 		if (match) {
 			const answerId = match[1];
-			return new Response(await answer(answerId, redirect, env), {
-				headers: {
-					'Content-Type': 'text/html',
-				},
-			});
+			try {
+				return new Response(await answer(answerId, redirect, env), {
+					headers: {
+						'Content-Type': 'text/html',
+					},
+				});
+			} catch (e: any) {
+				return e.response || new Response(e.message, { status: 500 });
+			}
 		}
 
 		match = path.match(/^\/p\/(\d+)\/?$/);
 		if (match) {
 			const articleId = match[1];
-			return new Response(await article(articleId, redirect, env), {
-				headers: {
-					'Content-Type': 'text/html',
-				},
-			});
+			try {
+				return new Response(await article(articleId, redirect, env), {
+					headers: {
+						'Content-Type': 'text/html',
+					},
+				});
+			} catch (e: any) {
+				return e.response || new Response(e.message, { status: 500 });
+			}
 		}
 
 		match = path.match(/^\/question\/(\d+)\/?$/);
 		if (match) {
 			const questionId = match[1];
-			return new Response(await question(questionId, redirect, env), {
-				headers: {
-					'Content-Type': 'text/html',
-				},
-			});
+			try {
+				return new Response(await question(questionId, redirect, env), {
+					headers: {
+						'Content-Type': 'text/html',
+					},
+				});
+			} catch (e: any) {
+				return e.response || new Response(e.message, { status: 500 });
+			}
 		}
 
 		// Redirect to the same URL under zhihu.com
