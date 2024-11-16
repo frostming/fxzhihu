@@ -57,7 +57,7 @@ Allow: /answer/*
 						},
 					});
 				} catch (e: any) {
-					if (e.response && (e.message satisfies string).includes("你似乎来到了没有知识存在的荒原")) {
+					if (e.response && (e.message as string).includes("你似乎来到了没有知识存在的荒原")) {
 						return new Response(errorPage(e), {
 							headers: {
 								'Content-Type': 'text/html',
