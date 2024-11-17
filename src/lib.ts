@@ -1,3 +1,5 @@
+import { ContentData, VideoContent } from "./status.js";
+
 export function fixImagesAndLinks(html: string): string {
 	let result = html.replaceAll(/<img [^>]+? data-actualsrc="([^>]+?)"[^>]+?(\/?>)/g, (match, p1, p2) => {
 		return `<img src="${p1}"${p2}`;
@@ -41,6 +43,23 @@ export function extractReference(html: string): string {
 		return `<hr><section><h2>参考</h2>${referenceList.join("<br>")}</section>`;
 	}
 	return "";
+}
+
+export function findVideoUrl(contents: ContentData): string | null {
+	for (const contentItem of contents) {
+		if (contentItem.type == 'video') {
+			const videoContent = contentItem as VideoContent;
+			for (const videoItem of videoContent.playlist) {
+				if (videoItem.quality == 'hd') {
+					const videoUrl = videoItem.url;
+					if (videoUrl) {
+						return videoUrl;
+					}
+				}
+			}
+		}
+	}
+	return null;
 }
 
 

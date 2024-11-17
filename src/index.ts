@@ -94,6 +94,8 @@ Allow: /answer/*
 					},
 				});
 			} catch (e: any) {
+				// add traceback
+				console.error(e);
 				return e.response || new Response(e.message, { status: 500 });
 			}
 		}
