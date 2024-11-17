@@ -14,6 +14,7 @@
 import { answer } from './answer';
 import { article } from './article';
 import { question } from './question';
+import { status } from './status';
 
 const GITHUB_REPO = 'https://github.com/frostming/fxzhihu';
 
@@ -74,6 +75,20 @@ Allow: /answer/*
 			const questionId = match[1];
 			try {
 				return new Response(await question(questionId, redirect, env), {
+					headers: {
+						'Content-Type': 'text/html',
+					},
+				});
+			} catch (e: any) {
+				return e.response || new Response(e.message, { status: 500 });
+			}
+		}
+
+		match = path.match(/^\/pin\/(\d+)\/?$/);
+		if (match) {
+			const pinId = match[1];
+			try {
+				return new Response(await status(pinId, redirect, env), {
 					headers: {
 						'Content-Type': 'text/html',
 					},
