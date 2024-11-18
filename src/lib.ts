@@ -1,7 +1,5 @@
 export async function fixImagesAndLinks(html: string) {
-	const encoder = new TextEncoder()
-	const bytes = encoder.encode(html)
-	const htmlResponse = new Response(bytes)
+	const htmlResponse = new Response(html)
 	// Create a new HTMLRewriter instance
 	const rewriter = new HTMLRewriter()
 		// Handle img tags
@@ -63,9 +61,7 @@ export function createTemplate<
 
 export async function extractReference(html: string) {
 	const references = new Map<string, { text: string; url: string }>();
-	const encoder = new TextEncoder();
-	const bytes = encoder.encode(html);
-	const htmlResponse = new Response(bytes);
+	const htmlResponse = new Response(html);
 
 	// Create HTMLRewriter instance to collect references
 	const rewriter = new HTMLRewriter()
