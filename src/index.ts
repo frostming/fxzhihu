@@ -14,6 +14,7 @@
 import { answer } from './answer';
 import { article } from './article';
 import { question } from './question';
+import { errorPage } from "./404";
 
 const GITHUB_REPO = 'https://github.com/frostming/fxzhihu';
 
@@ -41,45 +42,30 @@ Allow: /answer/*
 `);
 		}
 
-		let match = path.match(/^(?:\/question\/\d+)?\/answer\/(\d+)\/?$/);
-		if (match) {
-			const answerId = match[1];
-			try {
-				return new Response(await answer(answerId, redirect, env), {
-					headers: {
-						'Content-Type': 'text/html',
-					},
-				});
-			} catch (e: any) {
-				return e.response || new Response(e.message, { status: 500 });
-			}
-		}
-
-		match = path.match(/^\/p\/(\d+)\/?$/);
-		if (match) {
-			const articleId = match[1];
-			try {
-				return new Response(await article(articleId, redirect, env), {
-					headers: {
-						'Content-Type': 'text/html',
-					},
-				});
-			} catch (e: any) {
-				return e.response || new Response(e.message, { status: 500 });
-			}
-		}
-
-		match = path.match(/^\/question\/(\d+)\/?$/);
-		if (match) {
-			const questionId = match[1];
-			try {
-				return new Response(await question(questionId, redirect, env), {
-					headers: {
-						'Content-Type': 'text/html',
-					},
-				});
-			} catch (e: any) {
-				return e.response || new Response(e.message, { status: 500 });
+		for (const { regex, pageFunction } of [
+			{ regex: /^(?:\/question\/\d+)?\/answer\/(\d+)\/?$/, pageFunction: answer },
+			{ regex: /^\/p\/(\d+)\/?$/, pageFunction: article },
+			{ regex: /^\/question\/(\d+)\/?$/, pageFunction: question },
+		]) {
+			let match = path.match(regex);
+			if (match) {
+				const id = match[1];
+				try {
+					return new Response(await pageFunction(id, redirect, env), {
+						headers: {
+							'Content-Type': 'text/html',
+						},
+					});
+				} catch (e: any) {
+					if (e.response && (e.code as number) === 4041) {
+						return new Response(errorPage(e), {
+							headers: {
+								'Content-Type': 'text/html',
+							},
+						});
+					}
+					return e.response || new Response(e.message, { status: 500 });
+				}
 			}
 		}
 
