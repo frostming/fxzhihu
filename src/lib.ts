@@ -95,10 +95,11 @@ export async function extractReference(html: string) {
 }
 
 export class FetchError extends Error {
-	response?: Response;
+    response?: Response;
 
-	constructor(message: string, response?: Response) {
-		super(message);
-		this.response = response;
-	}
+    constructor(message: string, response?: Response) {
+        super(message);
+        this.response = response;
+    }
 }
+	
