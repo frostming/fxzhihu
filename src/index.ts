@@ -42,14 +42,15 @@ Allow: /answer/*
 `);
 		}
 
-		for (const { regex, pageFunction } of [
-			{ regex: /^(?:\/question\/\d+)?\/answer\/(\d+)\/?$/, pageFunction: answer },
-			{ regex: /^\/p\/(\d+)\/?$/, pageFunction: article },
-			{ regex: /^\/question\/(\d+)\/?$/, pageFunction: question },
+		for (const { urlPattern, pageFunction } of [
+			{ urlPattern: new URLPattern({ pathname: "/question/:_id(\\d+)/answer/:id(\\d+)" }), pageFunction: answer },
+			{ urlPattern: new URLPattern({ pathname: "/answer/:id(\\d+)" }), pageFunction: answer },
+			{ urlPattern: new URLPattern({ pathname: "/p/:id(\\d+)" }), pageFunction: article },
+			{ urlPattern: new URLPattern({ pathname: "/question/:id(\\d+)" }), pageFunction: question },
 		]) {
-			let match = path.match(regex);
+			let match = urlPattern.test(url);
 			if (match) {
-				const id = match[1];
+				const id = urlPattern.exec(url)?.pathname.groups?.id!;
 				try {
 					return new Response(await pageFunction(id, redirect, env), {
 						headers: {
