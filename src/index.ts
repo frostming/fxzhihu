@@ -61,7 +61,7 @@ Allow: /answer/*
 					});
 				} catch (e: any) {
 					// add traceback
-				    console.error(e);
+					console.error(e);
 					if (e.response && (e.code as number) === 4041) {
 						return new Response(errorPage(e), {
 							headers: {
