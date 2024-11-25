@@ -76,21 +76,13 @@ interface ContentData {
 	[Symbol.iterator](): IterableIterator<ContentItem>;
 }
 
-function findVideoUrl(contents: ContentData): string | null {
-	for (const contentItem of contents) {
-		if (contentItem.type == 'video') {
-			const videoContent = contentItem as VideoContent;
-			for (const videoItem of videoContent.playlist) {
-				if (videoItem.quality == 'hd') {
-					const videoUrl = videoItem.url;
-					if (videoUrl) {
-						return videoUrl;
-					}
-				}
-			}
-		}
-	}
-	return null;
+function findVideoUrl(contents: ContentData): string | undefined {
+	return contents
+		.content
+		.find(contentItem => contentItem.type === 'video')
+		?.playlist
+		?.find(videoItem => videoItem.quality === 'hd')
+		?.url;
 }
 
 const template = createTemplate`
