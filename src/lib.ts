@@ -1,14 +1,50 @@
-export function fixImagesAndLinks(html: string): string {
-	let result = html.replaceAll(/<img [^>]+? data-actualsrc="([^>]+?)"[^>]+?(\/?>)/g, (match, p1, p2) => {
-		return `<img src="${p1}"${p2}`;
-	});
-	result = result.replaceAll(/href="(https:\/\/link\.zhihu\.com\/.+?)"/g, (match, p1) => {
-		const url = new URL(p1);
-		const target = decodeURIComponent(url.searchParams.get('target') || '');
-		return `href="${target}"`;
-	});
-	result = result.replaceAll(/<u>([\s\S]*?)<\/u>/g, (match, p1) => p1);
-	return result;
+export async function fixImagesAndLinks(html: string) {
+	const htmlResponse = new Response(html)
+	// Create a new HTMLRewriter instance
+	const rewriter = new HTMLRewriter()
+		// Handle img tags
+		.on('img', {
+			element(element) {
+				const actualsrc = element.getAttribute('data-actualsrc')
+				if (actualsrc) {
+					element.setAttribute('src', actualsrc)
+					// Remove the data-actualsrc attribute
+					element.removeAttribute('data-actualsrc')
+				}
+			}
+		})
+		// Handle links
+		.on('a', {
+			element(element) {
+				const href = element.getAttribute('href')
+				if (href?.startsWith('https://link.zhihu.com/')) {
+					try {
+						const url = new URL(href)
+						const target = decodeURIComponent(url.searchParams.get('target') || '')
+						if (target) {
+							element.setAttribute('href', target)
+						}
+					} catch (e) {
+						// Keep original href if URL parsing fails
+						console.error('Failed to parse URL:', e)
+					}
+				}
+			}
+		})
+		// Handle u tags
+		.on('u', {
+			element(element) {
+				// Remove the u tag but keep its contents
+				element.remove()
+			},
+			text(text) {
+				// Ensure the text content is preserved
+				text.before(text.text)
+			}
+		})
+	// Transform the HTML content
+
+	return await rewriter.transform(htmlResponse).text()
 }
 
 export function createTemplate<
@@ -23,26 +59,40 @@ export function createTemplate<
 	};
 }
 
-export function extractReference(html: string): string {
-	const referenceRegex = /<sup[^>]*data-text="([^"]*)"[^>]*data-url="([^"]*)"[^>]*data-numero="([^"]*)"[^>]*>/g;
+export async function extractReference(html: string) {
 	const references = new Map<string, { text: string; url: string }>();
+	const htmlResponse = new Response(html);
 
-	let match;
-	while ((match = referenceRegex.exec(html)) !== null) {
-		const [, text, url, numero] = match;
-		references.set(numero, { text, url });
+	// Create HTMLRewriter instance to collect references
+	const rewriter = new HTMLRewriter()
+		.on('sup', {
+			element(element) {
+				const text = element.getAttribute('data-text')
+				const url = element.getAttribute('data-url')
+				const numero = element.getAttribute('data-numero')
+
+				if (text && url && numero) {
+					references.set(numero, { text, url })
+				}
+			}
+		})
+
+	// Process the HTML to collect references
+	await rewriter.transform(htmlResponse).text()
+
+	// Generate reference list if any references were found
+	if (references.size > 0) {
+		const referenceList = Array.from(references.entries())
+			.sort(([a], [b]) => parseInt(a) - parseInt(b))
+			.map(([index, { text, url }]) => `${index}. ${text} <a href="${url}">${url}</a>`)
+			.join('<br>')
+
+		return `<hr><section><h2>参考</h2>${referenceList}</section>`
 	}
 
-	let referenceList = Array.from(references.entries())
-		.sort(([a], [b]) => parseInt(a) - parseInt(b))
-		.map(([index, { text, url }]) => `${index}. ${text} <a href="${url}">${url}</a>`);
-
-	if (referenceList.length > 0) {
-		return `<hr><section><h2>参考</h2>${referenceList.join("<br>")}</section>`;
-	}
-	return "";
+	// Return empty string if no references found
+	return ''
 }
-
 
 export class FetchError extends Error {
     response?: Response;
@@ -52,3 +102,4 @@ export class FetchError extends Error {
         this.response = response;
     }
 }
+	

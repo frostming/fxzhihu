@@ -108,8 +108,8 @@ export async function answer(id: string, redirect: boolean, env: Env): Promise<s
 	return template({
 		title: data.question.title,
 		url: new URL(`${data.question.id}/answer/${id}`, `https://www.zhihu.com/question/`).href,
-		content: fixImagesAndLinks(data.content),
-		reference: extractReference(data.content),
+		content: await fixImagesAndLinks(data.content),
+		reference: await extractReference(data.content),
 		excerpt: data.excerpt,
 		author: data.author.name,
 		created_time: createdTime.toISOString(),
@@ -117,7 +117,7 @@ export async function answer(id: string, redirect: boolean, env: Env): Promise<s
 		voteup_count: data.voteup_count.toString(),
 		comment_count: data.comment_count.toString(),
 		question: data.question.detail.trim().length > 0 ? questionTemplate({
-			question: fixImagesAndLinks(data.question.detail),
+			question: await fixImagesAndLinks(data.question.detail),
 		}) : '',
 		redirect: redirect ? 'true' : 'false',
 		author_url: data.author.url.replace("api.", ""),

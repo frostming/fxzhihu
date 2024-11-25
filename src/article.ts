@@ -114,8 +114,8 @@ export async function article(id: string, redirect: boolean, env: Env): Promise<
 	return template({
 		title: data.title,
 		url: new URL(id, `https://zhuanlan.zhihu.com/p/`).href,
-		content: fixImagesAndLinks(data.content),
-		reference: extractReference(data.content),
+		content: await fixImagesAndLinks(data.content),
+		reference: await extractReference(data.content),
 		excerpt: data.excerpt,
 		author: data.author.name,
 		created_time: createdTime.toISOString(),
