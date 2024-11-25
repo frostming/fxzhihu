@@ -30,9 +30,11 @@ const template = createTemplate`
     <meta property="og:title" content="${"title"} | FxZhihu">
     <meta property="og:site_name" content="FxZhihu / Fixup Zhihu">
     <meta property="og:url" content="${"url"}">
-    <meta property="twitter:card" content="summary">
-    <meta name="twitter:title" property="og:title" itemprop="name" content="${"title"} | FxZhihu">
-    <meta name="twitter:description" property="og:description" itemprop="description" content="${"excerpt"}">
+	<meta property="og:image" content="${"image_url"}">
+	<meta property="og:description" content="${"excerpt"}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="FxZhihu" />
+	<meta name="twitter:creator" content="@${"author"}" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/yue.css@0.4.0/yue.css">
     <script>
