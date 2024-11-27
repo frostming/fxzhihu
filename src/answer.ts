@@ -2,18 +2,18 @@ import { Question } from "./question";
 import { fixImagesAndLinks, createTemplate, extractReference, FetchError } from "./lib";
 
 export type Answer = {
-	content: string;
-	excerpt: string;
-	author: {
-		name: string;
-		url: string;
-		headline: string;
-		avatar_url: string;
-	};
-	voteup_count: number;
-	comment_count: number;
-	question: Question;
-	created_time: number;
+  content: string;
+  excerpt: string;
+  author: {
+    name: string;
+    url: string;
+    headline: string;
+    avatar_url: string;
+  };
+  voteup_count: number;
+  comment_count: number;
+  question: Question;
+  created_time: number;
 }
 
 const template = createTemplate`
@@ -97,31 +97,31 @@ const questionTemplate = createTemplate`
 `;
 
 export async function answer(id: string, redirect: boolean, env: Env): Promise<string> {
-	const url = `https://api.zhihu.com/v4/answers/${id}?include=content%2Cexcerpt%2Cauthor%2Cvoteup_count%2Ccomment_count%2Cquestion%2Ccreated_time%2Cquestion.detail`;
-	const response = await fetch(url);
-	if (!response.ok) {
-		throw new FetchError(response.statusText, response);
-	}
-	const data = await response.json<Answer>();
-	const createdTime = new Date(data.created_time * 1000);
+  const url = `https://api.zhihu.com/v4/answers/${id}?include=content%2Cexcerpt%2Cauthor%2Cvoteup_count%2Ccomment_count%2Cquestion%2Ccreated_time%2Cquestion.detail`;
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new FetchError(response.statusText, response);
+  }
+  const data = await response.json<Answer>();
+  const createdTime = new Date(data.created_time * 1000);
 
-	return template({
-		title: data.question.title,
-		url: new URL(`${data.question.id}/answer/${id}`, `https://www.zhihu.com/question/`).href,
-		content: await fixImagesAndLinks(data.content),
-		reference: await extractReference(data.content),
-		excerpt: data.excerpt,
-		author: data.author.name,
-		created_time: createdTime.toISOString(),
-		created_time_formatted: createdTime.toDateString(),
-		voteup_count: data.voteup_count.toString(),
-		comment_count: data.comment_count.toString(),
-		question: data.question.detail.trim().length > 0 ? questionTemplate({
-			question: await fixImagesAndLinks(data.question.detail),
-		}) : '',
-		redirect: redirect ? 'true' : 'false',
-		author_url: data.author.url.replace("api.", ""),
-		headline: data.author.headline,
-		avatar_url: data.author.avatar_url,
-	});
+  return template({
+    title: data.question.title,
+    url: new URL(`${data.question.id}/answer/${id}`, `https://www.zhihu.com/question/`).href,
+    content: await fixImagesAndLinks(data.content),
+    reference: await extractReference(data.content),
+    excerpt: data.excerpt,
+    author: data.author.name,
+    created_time: createdTime.toISOString(),
+    created_time_formatted: createdTime.toDateString(),
+    voteup_count: data.voteup_count.toString(),
+    comment_count: data.comment_count.toString(),
+    question: data.question.detail.trim().length > 0 ? questionTemplate({
+      question: await fixImagesAndLinks(data.question.detail),
+    }) : '',
+    redirect: redirect ? 'true' : 'false',
+    author_url: data.author.url.replace("api.", ""),
+    headline: data.author.headline,
+    avatar_url: data.author.avatar_url,
+  });
 }
