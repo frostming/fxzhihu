@@ -15,6 +15,7 @@ import { answer } from './answer';
 import { article } from './article';
 import { question } from './question';
 import { errorPage } from "./404";
+import { status } from './status';
 
 const GITHUB_REPO = 'https://github.com/frostming/fxzhihu';
 
@@ -47,6 +48,7 @@ Allow: /answer/*
 			{ urlPattern: new URLPattern({ pathname: "/answer/:id(\\d+)" }), pageFunction: answer },
 			{ urlPattern: new URLPattern({ pathname: "/p/:id(\\d+)" }), pageFunction: article },
 			{ urlPattern: new URLPattern({ pathname: "/question/:id(\\d+)" }), pageFunction: question },
+			{ urlPattern: new URLPattern({ pathname: "/pin/:id(\\d+)" }), pageFunction: status },
 		]) {
 			let match = urlPattern.test(url);
 			if (match) {
@@ -58,6 +60,8 @@ Allow: /answer/*
 						},
 					});
 				} catch (e: any) {
+					// add traceback
+					console.error(e);
 					if (e.response && (e.code as number) === 4041) {
 						return new Response(errorPage(e), {
 							headers: {
