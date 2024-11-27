@@ -14,7 +14,7 @@ type Status = {
     headline: string;
     avatar_url: string;
   };
-  content: ContentData;
+  content: ContentItem[];
   created: number;
   updated: number;
   reaction: {
@@ -70,15 +70,8 @@ interface VideoFormat {
   size: number;
 }
 
-interface ContentData {
-  content: ContentItem[];
-
-  [Symbol.iterator](): IterableIterator<ContentItem>;
-}
-
-function findVideoUrl(contents: ContentData): string | undefined {
+function findVideoUrl(contents: ContentItem[]): string | undefined {
   return contents
-    .content
     .find(contentItem => contentItem.type === 'video')
     ?.playlist
     ?.find(videoItem => videoItem.quality === 'hd')
