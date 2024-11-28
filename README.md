@@ -26,6 +26,12 @@ https://www.fxzhihu.com/question/586886503
 https://zhuanlan.fxzhihu.com/p/425664231
 ```
 
+想法
+
+```
+https://www.fxzhihu.com/pin/1802686122138144770
+```
+
 在 URL 末尾添加 `?redirect=false` 可以禁止跳转到知乎原贴。
 
 <details>
@@ -42,6 +48,7 @@ https://zhuanlan.fxzhihu.com/p/425664231
 - [x] 答案
 - [x] 问题
 - [x] 专栏
+- [x] 想法
 
 ## 部署
 

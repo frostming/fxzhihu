@@ -1,19 +1,19 @@
 import { Question } from "./question";
-import { fixImagesAndLinks, createTemplate, extractReference } from "./lib";
+import { fixImagesAndLinks, createTemplate, extractReference, FetchError } from "./lib";
 
 export type Answer = {
-	content: string;
-	excerpt: string;
-	author: {
-		name: string;
-		url: string;
-		headline: string;
-		avatar_url: string;
-	};
-	voteup_count: number;
-	comment_count: number;
-	question: Question;
-	created_time: number;
+  content: string;
+  excerpt: string;
+  author: {
+    name: string;
+    url: string;
+    headline: string;
+    avatar_url: string;
+  };
+  voteup_count: number;
+  comment_count: number;
+  question: Question;
+  created_time: number;
 }
 
 const template = createTemplate`
@@ -25,11 +25,12 @@ const template = createTemplate`
     <meta property="og:type" content="website">
     <meta property="og:title" content="${"title"} - @${"author"} | FxZhihu">
     <meta property="og:site_name" content="FxZhihu / Fixup Zhihu">
+    <meta property="og:description" itemprop="description" content="${"excerpt"}">
     <meta property="og:url" content="${"url"}">
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/yue.css@0.4.0/yue.css">
-    <meta property="twitter:card" content="summary">
-    <meta name="twitter:title" property="og:title" itemprop="name" content="${"title"} - @${"author"} | FxZhihu">
-    <meta name="twitter:description" property="og:description" itemprop="description" content="${"excerpt"}">
+    <meta name="twitter:card" content="summary">
+	<meta name="twitter:site" content="FxZhihu" />
+	<meta name="twitter:creator" content="@${"author"}" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
     <script>
         const redirect = ${"redirect"};
@@ -51,12 +52,15 @@ const template = createTemplate`
             display: flex;
             gap: 1em;
         }
-        .avatar {
+        #avatar {
             width: 100px;
             height: 100px;
         }
         .author > div {
             flex: 1;
+        }
+        a[data-draft-type="link-card"] {
+           display: block;
         }
     </style>
 </head>
@@ -64,7 +68,7 @@ const template = createTemplate`
     <header>
         <h1><a href="${"url"}">${"title"}</a></h1>
         <div class="author">
-            <img class="avatar" src="${"avatar_url"}" />
+            <img class="avatar" id="avatar" src="${"avatar_url"}" />
             <div>
                 <h2 rel="author">
                     <a href="${"author_url"}" target="_blank">@${"author"}</a>
@@ -93,29 +97,31 @@ const questionTemplate = createTemplate`
 `;
 
 export async function answer(id: string, redirect: boolean, env: Env): Promise<string> {
-	const url = `https://api.zhihu.com/v4/answers/${id}?include=content%2Cexcerpt%2Cauthor%2Cvoteup_count%2Ccomment_count%2Cquestion%2Ccreated_time%2Cquestion.detail`;
-	const response = await fetch(url);
-	const data = (await response.json()) as Answer;
-	console.log(data);
-	const createdTime = new Date(data.created_time * 1000);
+  const url = `https://api.zhihu.com/v4/answers/${id}?include=content%2Cexcerpt%2Cauthor%2Cvoteup_count%2Ccomment_count%2Cquestion%2Ccreated_time%2Cquestion.detail`;
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new FetchError(response.statusText, response);
+  }
+  const data = await response.json<Answer>();
+  const createdTime = new Date(data.created_time * 1000);
 
-	return template({
-		title: data.question.title,
-		url: new URL(`${data.question.id}/answer/${id}`, `https://www.zhihu.com/question/`).href,
-		content: fixImagesAndLinks(data.content),
-		reference: extractReference(data.content),
-		excerpt: data.excerpt,
-		author: data.author.name,
-		created_time: createdTime.toISOString(),
-		created_time_formatted: createdTime.toDateString(),
-		voteup_count: data.voteup_count.toString(),
-		comment_count: data.comment_count.toString(),
-		question: data.question.detail.trim().length > 0 ? questionTemplate({
-			question: fixImagesAndLinks(data.question.detail),
-		}) : '',
-		redirect: redirect ? 'true' : 'false',
-		author_url: data.author.url.replace("api.", ""),
-		headline: data.author.headline,
-		avatar_url: data.author.avatar_url,
-	});
+  return template({
+    title: data.question.title,
+    url: new URL(`${data.question.id}/answer/${id}`, `https://www.zhihu.com/question/`).href,
+    content: await fixImagesAndLinks(data.content),
+    reference: await extractReference(data.content),
+    excerpt: data.excerpt,
+    author: data.author.name,
+    created_time: createdTime.toISOString(),
+    created_time_formatted: createdTime.toDateString(),
+    voteup_count: data.voteup_count.toString(),
+    comment_count: data.comment_count.toString(),
+    question: data.question.detail.trim().length > 0 ? questionTemplate({
+      question: await fixImagesAndLinks(data.question.detail),
+    }) : '',
+    redirect: redirect ? 'true' : 'false',
+    author_url: data.author.url.replace("api.", ""),
+    headline: data.author.headline,
+    avatar_url: data.author.avatar_url,
+  });
 }
