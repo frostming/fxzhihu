@@ -16,6 +16,7 @@ import { article } from './article';
 import { question } from './question';
 import { errorPage } from "./404";
 import { status } from './status';
+import { TransformUrl } from './lib';
 
 const GITHUB_REPO = 'https://github.com/frostming/fxzhihu';
 
@@ -26,6 +27,7 @@ export default {
     let redirect = !['false', 'no'].includes(url.searchParams.get('redirect') || '');
     // Redirect unless the request is coming from Telegram
     const referer = request.headers.get('Referer') || '';
+    const isLocal = request.url.includes('localhost:8787');
     if (!referer.toLowerCase().includes('https://t.me')) {
       redirect = false;
     }
@@ -54,7 +56,7 @@ Allow: /answer/*
       if (match) {
         const id = urlPattern.exec(url)?.pathname.groups?.id!;
         try {
-          return new Response(await pageFunction(id, redirect, env), {
+          return new Response(await TransformUrl((await pageFunction(id, redirect, env)), isLocal), {
             headers: {
               'Content-Type': 'text/html',
             },

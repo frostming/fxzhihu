@@ -1,23 +1,3 @@
-/**
- * Transforms Zhihu URLs to FxZhihu URLs anywhere in the text
- */
-function transformZhihuUrls(text: string) {
-	// Regular expressions for matching three types of Zhihu URLs
-	const zhihuQuestionRegex = /https?:\/\/(?:www\.)?zhihu\.com\/(question\/\d+\/answer\/\d+)/g;
-	const zhihuAnswerRegex = /https?:\/\/(?:www\.)?zhihu\.com\/(answer\/\d+)/g;
-	const zhuanlanRegex = /https?:\/\/(?:zhuanlan\.)?zhihu\.com\/(p\/\d+)/g;
-
-	// Transform www.zhihu.com/question/xxx/answer/xxx URLs
-	return text.replace(zhihuQuestionRegex, 'https://www.fxzhihu.com/$1')
-
-		// Transform www.zhihu.com/answer/xxx URLs
-		.replace(zhihuAnswerRegex, 'https://www.fxzhihu.com/$1')
-
-		// Transform zhuanlan.zhihu.com/p/xxx URLs
-		.replace(zhuanlanRegex, 'https://zhuanlan.fxzhihu.com/$1');
-
-}
-
 export async function fixImagesAndLinks(html: string) {
   const htmlResponse = new Response(html)
   // Create a new HTMLRewriter instance
@@ -123,3 +103,63 @@ export class FetchError extends Error {
   }
 }
 
+export async function TransformUrl(url: string, isLocal: boolean) {
+  const patterns = {
+    question: new URLPattern({
+      protocol: 'https',
+      hostname: '*.zhihu.com',
+      pathname: '/question/:questionId/answer/:answerId'
+    }),
+    answer: new URLPattern({
+      protocol: 'https',
+      hostname: '*.zhihu.com',
+      pathname: '/answer/:answerId'
+    }),
+    article: new URLPattern({
+      protocol: 'https',
+      hostname: 'zhuanlan.zhihu.com',
+      pathname: '/p/:articleId'
+    })
+  };
+
+  const transformUrl = (urlString: string, isLocal: boolean) => {
+    if (!urlString.startsWith('https')) return urlString;
+
+    try {
+      const questionMatch = patterns.question.exec(urlString);
+      if (questionMatch) {
+        return isLocal
+          ? `http://localhost:8787/question/${questionMatch.pathname.groups.questionId}/answer/${questionMatch.pathname.groups.answerId}`
+          : `https://www.fxzhihu.com/question/${questionMatch.pathname.groups.questionId}/answer/${questionMatch.pathname.groups.answerId}`;
+      }
+
+      const answerMatch = patterns.answer.exec(urlString);
+      if (answerMatch) {
+        return isLocal
+          ? `http://localhost:8787/answer/${answerMatch.pathname.groups.answerId}`
+          : `https://www.fxzhihu.com/answer/${answerMatch.pathname.groups.answerId}`;
+      }
+
+      const articleMatch = patterns.article.exec(urlString);
+      if (articleMatch) {
+        return isLocal
+          ? `http://localhost:8787/p/${articleMatch.pathname.groups.articleId}`
+          : `https://zhuanlan.fxzhihu.com/p/${articleMatch.pathname.groups.articleId}`;
+      }
+
+      return urlString;
+    } catch (e) {
+      return urlString;
+    }
+  };
+  return new HTMLRewriter()
+    .on('a', {
+      element(element) {
+        const href = element.getAttribute('href');
+        if (href?.startsWith('https')) {
+          element.setAttribute('href', transformUrl(href, isLocal));
+        }
+      }
+    }).transform(new Response(url)).text();
+  // Transform HTML string
+}
