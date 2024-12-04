@@ -56,7 +56,7 @@ Allow: /answer/*
       if (match) {
         const id = urlPattern.exec(url)?.pathname.groups?.id!;
         try {
-          return new Response(await TransformUrl((await pageFunction(id, redirect, env)), isLocal), {
+          return new Response(await TransformUrl((await pageFunction(id, redirect, env)), env), {
             headers: {
               'Content-Type': 'text/html',
             },

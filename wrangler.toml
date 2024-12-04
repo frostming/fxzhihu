@@ -23,7 +23,12 @@ routes = [
 # - https://developers.cloudflare.com/workers/configuration/secrets/
 # [vars]
 # MY_VARIABLE = "production_value"
+[vars]
+API_URL = "https://www.fxzhihu.com"
+ARTICLE_URL = "https://zhuanlan.fxzhihu.com"
 
+[env.development]
+vars = { API_URL = "http://localhost:8787", ARTICLE_URL = "http://localhost:8787" }
 # Bind the Workers AI model catalog. Run machine learning models, powered by serverless GPUs, on Cloudflare’s global network
 # Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#workers-ai
 # [ai]
