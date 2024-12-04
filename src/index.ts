@@ -27,7 +27,6 @@ export default {
     let redirect = !['false', 'no'].includes(url.searchParams.get('redirect') || '');
     // Redirect unless the request is coming from Telegram
     const referer = request.headers.get('Referer') || '';
-    const isLocal = request.url.includes('localhost:8787');
     if (!referer.toLowerCase().includes('https://t.me')) {
       redirect = false;
     }
