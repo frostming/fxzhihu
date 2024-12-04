@@ -149,10 +149,8 @@ export async function TransformUrl(url: string, env: Env) {
   return new HTMLRewriter()
     .on('a', {
       element(element) {
-        const href = element.getAttribute('href');
-        if (href?.startsWith('https')) {
-          element.setAttribute('href', transformUrl(href, env));
-        }
+        const href = element.getAttribute('href')!;
+        element.setAttribute('href', transformUrl(href, env));
       }
     }).transform(new Response(url)).text();
   // Transform HTML string
