@@ -103,3 +103,55 @@ export class FetchError extends Error {
   }
 }
 
+export async function TransformUrl(url: string, env: Env) {
+  const patterns = {
+    question: new URLPattern({
+      protocol: 'http{s}?',
+      hostname: '*.zhihu.com',
+      pathname: '/question/:questionId/answer/:answerId'
+    }),
+    answer: new URLPattern({
+      protocol: 'http{s}?',
+      hostname: '*.zhihu.com',
+      pathname: '/answer/:answerId'
+    }),
+    article: new URLPattern({
+      protocol: 'http{s}?',
+      hostname: 'zhuanlan.zhihu.com',
+      pathname: '/p/:articleId'
+    })
+  };
+
+  const transformUrl = (urlString: string, env: Env) => {
+    if (!urlString.startsWith('http')) return urlString;
+
+    try {
+      const questionMatch = patterns.question.exec(urlString);
+      if (questionMatch) {
+        return env.API_URL + `/question/${questionMatch.pathname.groups.questionId}/answer/${questionMatch.pathname.groups.answerId}`
+      }
+
+      const answerMatch = patterns.answer.exec(urlString);
+      if (answerMatch) {
+        return env.API_URL + `/answer/${answerMatch.pathname.groups.answerId}`
+      }
+
+      const articleMatch = patterns.article.exec(urlString);
+      if (articleMatch) {
+        return env.ARTICLE_URL + `/p/${articleMatch.pathname.groups.articleId}`
+      }
+
+      return urlString;
+    } catch (e) {
+      return urlString;
+    }
+  };
+  return new HTMLRewriter()
+    .on('a', {
+      element(element) {
+        const href = element.getAttribute('href')!;
+        element.setAttribute('href', transformUrl(href, env));
+      }
+    }).transform(new Response(url)).text();
+  // Transform HTML string
+}

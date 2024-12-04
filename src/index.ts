@@ -16,6 +16,7 @@ import { article } from './article';
 import { question } from './question';
 import { errorPage } from "./404";
 import { status } from './status';
+import { TransformUrl } from './lib';
 
 const GITHUB_REPO = 'https://github.com/frostming/fxzhihu';
 
@@ -54,7 +55,7 @@ Allow: /answer/*
       if (match) {
         const id = urlPattern.exec(url)?.pathname.groups?.id!;
         try {
-          return new Response(await pageFunction(id, redirect, env), {
+          return new Response(await TransformUrl((await pageFunction(id, redirect, env)), env), {
             headers: {
               'Content-Type': 'text/html',
             },
