@@ -128,23 +128,17 @@ export async function TransformUrl(url: string, isLocal: boolean) {
     try {
       const questionMatch = patterns.question.exec(urlString);
       if (questionMatch) {
-        return isLocal
-          ? `http://localhost:8787/question/${questionMatch.pathname.groups.questionId}/answer/${questionMatch.pathname.groups.answerId}`
-          : `https://www.fxzhihu.com/question/${questionMatch.pathname.groups.questionId}/answer/${questionMatch.pathname.groups.answerId}`;
+        return (isLocal ? `http://localhost:8787` : `https://www.fxzhihu.com`) + `/question/${questionMatch.pathname.groups.questionId}/answer/${questionMatch.pathname.groups.answerId}`
       }
 
       const answerMatch = patterns.answer.exec(urlString);
       if (answerMatch) {
-        return isLocal
-          ? `http://localhost:8787/answer/${answerMatch.pathname.groups.answerId}`
-          : `https://www.fxzhihu.com/answer/${answerMatch.pathname.groups.answerId}`;
+        return (isLocal ? `http://localhost:8787` : `https://www.fxzhihu.com`) + `/answer/${answerMatch.pathname.groups.answerId}`
       }
 
       const articleMatch = patterns.article.exec(urlString);
       if (articleMatch) {
-        return isLocal
-          ? `http://localhost:8787/p/${articleMatch.pathname.groups.articleId}`
-          : `https://zhuanlan.fxzhihu.com/p/${articleMatch.pathname.groups.articleId}`;
+        return (isLocal ? `http://localhost:8787` : `https://zhuanlan.fxzhihu.com`) + `/p/${articleMatch.pathname.groups.articleId}`
       }
 
       return urlString;
