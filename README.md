@@ -77,7 +77,7 @@ https://greasyfork.org/zh-CN/scripts/510234-zhihu-link-fixer
 ## 开发
 
 ```
-pnpm dev --env development
+pnpm dev
 ```
 
 专栏链接是 `https://zhuanlan.zhihu.com/p/NUMBER`, 访问 <http://localhost:8787/p/NUMBER?redirect=no> 就能看到效果
