@@ -123,7 +123,7 @@ export async function TransformUrl(url: string, env: Env) {
   };
 
   const transformUrl = (urlString: string, env: Env) => {
-    if (!urlString.startsWith('https')) return urlString;
+    if (!urlString.startsWith('http')) return urlString;
 
     try {
       const questionMatch = patterns.question.exec(urlString);
