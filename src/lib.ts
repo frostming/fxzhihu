@@ -106,17 +106,17 @@ export class FetchError extends Error {
 export async function TransformUrl(url: string, env: Env) {
   const patterns = {
     question: new URLPattern({
-      protocol: 'https',
+      protocol: 'http{s}?',
       hostname: '*.zhihu.com',
       pathname: '/question/:questionId/answer/:answerId'
     }),
     answer: new URLPattern({
-      protocol: 'https',
+      protocol: 'http{s}?',
       hostname: '*.zhihu.com',
       pathname: '/answer/:answerId'
     }),
     article: new URLPattern({
-      protocol: 'https',
+      protocol: 'http{s}?',
       hostname: 'zhuanlan.zhihu.com',
       pathname: '/p/:articleId'
     })
