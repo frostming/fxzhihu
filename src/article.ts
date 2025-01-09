@@ -88,6 +88,10 @@ const template = createTemplate`
     .references {
       font-size: 0.85em;
     }
+    .formula-display {
+      display: block;
+      text-align: center;
+    }
   </style>
 </head>
 <body style="max-width: 1000px; margin: 0 auto; padding: 0 1em 0 1em;" class="yue">

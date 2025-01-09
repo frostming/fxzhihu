@@ -157,10 +157,10 @@ function escapeHtml(text: string, insertBreaks: boolean = true) {
 }
 
 // NOTE: This is an incomplete list, please add more.
-export type SegmentType = 'paragraph' | 'image' | 'heading' | 'card' | 'blockquote' | 'reference_block' | 'video' | 'code_block' | 'list_node';
+export type SegmentType = 'paragraph' | 'hr' | 'image' | 'heading' | 'card' | 'blockquote' | 'reference_block' | 'video' | 'code_block' | 'list_node';
 type MarkType = 'link' | 'formula' | 'reference' | 'italic' | 'bold';
 type Mark<T extends MarkType> = {
-  [K in T]: K extends 'reference' ? { index: number } : K extends 'link' ? { href: string } : K extends 'formula' ? { img_url: string, width: number } : never;
+  [K in T]: K extends 'reference' ? { index: number } : K extends 'link' ? { href: string } : K extends 'formula' ? { img_url: string, height: number, width: number } : never;
 } & {
   start_index: number;
   end_index: number;
@@ -195,8 +195,9 @@ function replaceMarks(text: string, marks: Mark<MarkType>[]) {
   for (const mark of marks.sort((a, b) => a.start_index - b.start_index)) {
     switch (mark.type) {
       case 'formula':
-        addToExtras(mark.start_index, `<img src="${mark.formula.img_url}" alt="`);
-        addToExtras(mark.end_index, `" width="${mark.formula.width * 1.2}px">`, true);
+        const isBlock = mark.formula.height >= 28;
+        addToExtras(mark.start_index, `<span ${isBlock ? 'class="formula-display"' : ''}><img src="${mark.formula.img_url}" alt="`);
+        addToExtras(mark.end_index, `" width="${mark.formula.width * 1.2}px"></span>`, true);
         break;
       case 'reference':
         addToExtras(mark.start_index, `<sup data-text="${mark.reference.index}" id="reflink__${mark.reference.index}" data-numero="${mark.reference.index}">
@@ -259,6 +260,8 @@ export function renderSegments(segments: Segment<SegmentType>[]): string {
         return `<${segment.list_node.type === 'ordered' ? 'ol' : 'ul'}>
           ${segment.list_node.items.map(item => `<li>${replaceMarks(item.text, item.marks)}</li>`).join('\n')}
           </${segment.list_node.type === 'ordered' ? 'ol' : 'ul'}>`;
+      case 'hr':
+        return '<hr>';
       default:
         return escapeHtml((segment[segment.type] as any)?.text || '');
     }
