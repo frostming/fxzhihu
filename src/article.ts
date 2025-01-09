@@ -1,22 +1,37 @@
-import { fixImagesAndLinks, createTemplate, extractReference, FetchError } from "./lib";
+import { createTemplate, FetchError, Segment, renderSegments, SegmentType } from "./lib";
 
 export type Article = {
-  title: string;
-  content: string;
+  header: {
+    text: string;
+  };
+  structured_content: { segments: Segment<SegmentType>[] };
   excerpt: string;
   author: {
-    name: string;
-    url: string;
-    headline: string;
-    avatar_url: string;
-  };
-  created: number;
-  voteup_count: number;
-  comment_count: number;
-  image_url: string;
-  column: {
-    title: string;
+    fullname: string;
     description: string;
+    avatar: {
+      avatar_image: {
+        day: string;
+        jump_url: string;
+      };
+    };
+  };
+  content_end_info: {
+    create_time_text: string;
+  };
+  reaction: {
+    statistics: {
+      up_vote_count: number;
+      comment_count: number;
+    };
+  }
+  cover_image: {
+    url: string;
+  };
+  third_business: {
+    column: {
+      title: string;
+    };
   };
 }
 
@@ -90,7 +105,6 @@ const template = createTemplate`
   </header>
   <article>
     ${"content"}
-    ${"reference"}
     <hr>
     <div class="column" style="margin: 1em 0; padding: 0.5em 1em; border: 2px solid #999; border-radius: 5px;">
       <h2>专栏：${"column_title"}</h2>
@@ -102,31 +116,33 @@ const template = createTemplate`
 `;
 
 export async function article(id: string, redirect: boolean, env: Env): Promise<string> {
-  const url = new URL(id, `https://api.zhihu.com/article/`);
-  const response = await fetch(url);
+  const url = new URL(id, `https://api.zhihu.com/articles/v2/`);
+  const response = await fetch(url, {
+    "headers": {
+      "user-agent": "node",
+    },
+  });
   if (!response.ok) {
     throw new FetchError(response.statusText, response);
   }
   const data = await response.json<Article>();
-  const createdTime = new Date(data.created * 1000);
 
   return template({
-    title: data.title,
+    title: data.header.text,
     url: new URL(id, `https://zhuanlan.zhihu.com/p/`).href,
-    content: await fixImagesAndLinks(data.content),
-    reference: await extractReference(data.content),
+    content: renderSegments(data.structured_content.segments),
     excerpt: data.excerpt,
-    author: data.author.name,
-    created_time: createdTime.toISOString(),
-    created_time_formatted: createdTime.toDateString(),
-    voteup_count: data.voteup_count.toString(),
-    comment_count: data.comment_count.toString(),
-    column_title: data.column.title,
-    column_description: data.column.description,
+    author: data.author.fullname,
+    created_time: data.content_end_info.create_time_text,
+    created_time_formatted: data.content_end_info.create_time_text,
+    voteup_count: data.reaction.statistics.up_vote_count.toString(),
+    comment_count: data.reaction.statistics.comment_count.toString(),
+    column_title: data.third_business.column.title,
+    column_description: '',
     redirect: redirect ? 'true' : 'false',
-    author_url: data.author.url.replace("api.", ""),
-    headline: data.author.headline,
-    avatar_url: data.author.avatar_url,
-    image_url: data.image_url,
+    author_url: data.author.avatar.avatar_image.jump_url,
+    headline: data.author.description,
+    avatar_url: data.author.avatar.avatar_image.day,
+    image_url: data.cover_image.url,
   });
 }
