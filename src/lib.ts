@@ -160,7 +160,7 @@ function escapeHtml(text: string, insertBreaks: boolean = true) {
 export type SegmentType = 'paragraph' | 'image' | 'heading' | 'card' | 'blockquote' | 'reference_block' | 'video' | 'code_block' | 'list_node';
 type MarkType = 'link' | 'formula' | 'reference' | 'italic' | 'bold';
 type Mark<T extends MarkType> = {
-  [K in T]: K extends 'reference' ? { index: number } : K extends 'link' ? { href: string } : K extends 'formula' ? { img_url: string } : never;
+  [K in T]: K extends 'reference' ? { index: number } : K extends 'link' ? { href: string } : K extends 'formula' ? { img_url: string, width: number } : never;
 } & {
   start_index: number;
   end_index: number;
@@ -196,7 +196,7 @@ function replaceMarks(text: string, marks: Mark<MarkType>[]) {
     switch (mark.type) {
       case 'formula':
         addToExtras(mark.start_index, `<img src="${mark.formula.img_url}" alt="`);
-        addToExtras(mark.end_index, '">', true);
+        addToExtras(mark.end_index, `" width="${mark.formula.width * 1.2}px">`, true);
         break;
       case 'reference':
         addToExtras(mark.start_index, `<sup data-text="${mark.reference.index}" id="reflink__${mark.reference.index}" data-numero="${mark.reference.index}">
