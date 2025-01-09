@@ -25,11 +25,11 @@ export type Article = {
       comment_count: number;
     };
   }
-  cover_image: {
+  cover_image?: {
     url: string;
   };
   third_business: {
-    column: {
+    column?: {
       title: string;
     };
   };
@@ -144,12 +144,12 @@ export async function article(id: string, redirect: boolean, env: Env): Promise<
     created_time_formatted: data.content_end_info.create_time_text,
     voteup_count: data.reaction.statistics.up_vote_count.toString(),
     comment_count: data.reaction.statistics.comment_count.toString(),
-    column_title: data.third_business.column.title,
+    column_title: data.third_business.column?.title ?? '',
     column_description: '',
     redirect: redirect ? 'true' : 'false',
     author_url: data.author.avatar.avatar_image.jump_url,
     headline: data.author.description,
     avatar_url: data.author.avatar.avatar_image.day,
-    image_url: data.cover_image.url,
+    image_url: data.cover_image?.url ?? '',
   });
 }
