@@ -13,24 +13,6 @@ export async function fixImagesAndLinks(html: string) {
         }
       }
     })
-    // Handle links
-    .on('a', {
-      element(element) {
-        const href = element.getAttribute('href')
-        if (href?.startsWith('https://link.zhihu.com/')) {
-          try {
-            const url = new URL(href)
-            const target = decodeURIComponent(url.searchParams.get('target') || '')
-            if (target) {
-              element.setAttribute('href', target)
-            }
-          } catch (e) {
-            // Keep original href if URL parsing fails
-            console.error('Failed to parse URL:', e)
-          }
-        }
-      }
-    })
     // Handle u tags
     .on('u', {
       element(element) {
@@ -150,8 +132,133 @@ export async function TransformUrl(url: string, env: Env) {
     .on('a', {
       element(element) {
         const href = element.getAttribute('href')!;
-        element.setAttribute('href', transformUrl(href, env));
+        if (href?.startsWith('https://link.zhihu.com/')) {
+          try {
+            const url = new URL(href)
+            const target = decodeURIComponent(url.searchParams.get('target') || '')
+            if (target) {
+              element.setAttribute('href', target)
+            }
+          } catch (e) {
+            // Keep original href if URL parsing fails
+            console.error('Failed to parse URL:', e)
+          }
+        } else {
+          element.setAttribute('href', transformUrl(href, env));
+        }
       }
     }).transform(new Response(url)).text();
   // Transform HTML string
+}
+
+function escapeHtml(text: string, insertBreaks: boolean = true) {
+  text = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return insertBreaks ? text.replace(/\n/g, '<br>') : text;
+}
+
+// NOTE: This is an incomplete list, please add more.
+export type SegmentType = 'paragraph' | 'image' | 'heading' | 'card' | 'blockquote' | 'reference_block' | 'video' | 'code_block' | 'list_node';
+type MarkType = 'link' | 'formula' | 'reference' | 'italic' | 'bold';
+type Mark<T extends MarkType> = {
+  [K in T]: K extends 'reference' ? { index: number } : K extends 'link' ? { href: string } : K extends 'formula' ? { img_url: string } : never;
+} & {
+  start_index: number;
+  end_index: number;
+  type: T;
+};
+
+export type Segment<T extends SegmentType> = {
+  [K in T]: (K extends 'paragraph' ? { text: string }
+    : K extends 'image' ? { urls: string[] }
+    : K extends 'heading' ? { level: number, text: string }
+    : K extends 'card' ? { url: string, title: string }
+    : K extends 'blockquote' ? { text: string }
+    : K extends 'reference_block' ? { items: { text: string, marks: Mark<MarkType>[] }[] }
+    : K extends 'video' ? { url: string }
+    : K extends 'code_block' ? { content: string, language: string }
+    : K extends 'list_node' ? { items: { text: string, marks: Mark<MarkType>[] }[], type: 'ordered' | 'unordered' }
+    : never) & { marks: Mark<MarkType>[] };
+} & {
+  type: T;
+}
+
+function replaceMarks(text: string, marks: Mark<MarkType>[]) {
+  const extras = new Map<number, string[]>();
+  const addToExtras = (index: number, content: string, first: boolean = false) => {
+    if (!extras.has(index)) extras.set(index, []);
+    if (first) {
+      extras.get(index)!.unshift(content);
+    } else {
+      extras.get(index)!.push(content);
+    }
+  }
+  for (const mark of marks.sort((a, b) => a.start_index - b.start_index)) {
+    switch (mark.type) {
+      case 'formula':
+        addToExtras(mark.start_index, `<img src="${mark.formula.img_url}" alt="`);
+        addToExtras(mark.end_index, '">', true);
+        break;
+      case 'reference':
+        addToExtras(mark.start_index, `<sup data-text="${mark.reference.index}" data-url="${mark.reference.index}" data-numero="${mark.reference.index}">
+          <a href="#ref__${mark.reference.index}">`);
+        addToExtras(mark.end_index, '</a></sup>', true);
+        break;
+      case 'link':
+        if (mark.link.href) {
+          addToExtras(mark.start_index, `<a href="${mark.link.href}">`);
+          addToExtras(mark.end_index, '</a>', true);
+        }
+        break;
+      case 'italic':
+        addToExtras(mark.start_index, '<em>');
+        addToExtras(mark.end_index, '</em>', true);
+        break;
+      case 'bold':
+        addToExtras(mark.start_index, '<strong>');
+        addToExtras(mark.end_index, '</strong>', true);
+        break;
+    }
+  }
+  const parts = [];
+  let lastIndex = 0;
+  [...extras.entries()].sort((a, b) => a[0] - b[0]).forEach(([index, extra]) => {
+    if (index > lastIndex) {
+      parts.push(escapeHtml(text.substring(lastIndex, index)));
+    }
+    parts.push(...extra);
+    lastIndex = index;
+  });
+  if (lastIndex < text.length) {
+    parts.push(escapeHtml(text.substring(lastIndex)));
+  }
+  return parts.join('');
+}
+
+export function renderSegments(segments: Segment<SegmentType>[]): string {
+  return segments.map(segment => {
+    switch (segment.type) {
+      case 'paragraph':
+        return `<p>${replaceMarks(segment.paragraph.text, segment.paragraph.marks)}</p>`;
+      case 'blockquote':
+        return `<blockquote>${replaceMarks(segment.blockquote.text, segment.blockquote.marks)}</blockquote>`;
+      case 'heading':
+        return `<h${segment.heading.level}>${replaceMarks(segment.heading.text, segment.heading.marks)}</h${segment.heading.level}>`;
+      case 'image':
+        return `<img src="${segment.image.urls[0]}">`;
+      case 'card':
+        return `<p><a href="${segment.card.url}">${segment.card.title}</a></p>`;
+      case 'reference_block':
+        return `<h2>参考</h2><ol>${segment.reference_block.items.map((item, index) => `<li id="ref__${index}">${replaceMarks(item.text, item.marks)}</li>`).join('\n')}</ol>`;
+      case 'video':
+        return `<video src="${segment.video.url}" controls></video>`;
+      case 'code_block':
+        return `<pre><code class="${segment.code_block.language}">${escapeHtml(segment.code_block.content, false)}</code></pre>`;
+      case 'list_node':
+        return `<${segment.list_node.type === 'ordered' ? 'ol' : 'ul'}>
+          ${segment.list_node.items.map(item => `<li>${replaceMarks(item.text, item.marks)}</li>`).join('\n')}
+          </${segment.list_node.type === 'ordered' ? 'ol' : 'ul'}>`;
+      default:
+        return escapeHtml((segment[segment.type] as any)?.text || '');
+    }
+  }).join('');
 }
