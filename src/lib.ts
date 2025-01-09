@@ -249,7 +249,7 @@ export function renderSegments(segments: Segment<SegmentType>[]): string {
         return `<p><a href="${segment.card.url}">${segment.card.title}</a></p>`;
       case 'reference_block':
         return `<h2>参考</h2><ol class="references">${segment.reference_block.items.map(
-          (item, index) => `<li id="ref__${index}">${replaceMarks(item.text, item.marks)}<a href="#reflink__${index}">⏎</a></li>`
+          (item, index) => `<li id="ref__${index + 1}">${replaceMarks(item.text, item.marks)}<a href="#reflink__${index + 1}">⏎</a></li>`
         ).join('\n')}</ol>`;
       case 'video':
         return `<video src="${segment.video.url}" controls></video>`;
