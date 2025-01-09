@@ -199,7 +199,7 @@ function replaceMarks(text: string, marks: Mark<MarkType>[]) {
         addToExtras(mark.end_index, '">', true);
         break;
       case 'reference':
-        addToExtras(mark.start_index, `<sup data-text="${mark.reference.index}" data-url="${mark.reference.index}" data-numero="${mark.reference.index}">
+        addToExtras(mark.start_index, `<sup data-text="${mark.reference.index}" id="reflink__${mark.reference.index}" data-numero="${mark.reference.index}">
           <a href="#ref__${mark.reference.index}">`);
         addToExtras(mark.end_index, '</a></sup>', true);
         break;
@@ -248,7 +248,9 @@ export function renderSegments(segments: Segment<SegmentType>[]): string {
       case 'card':
         return `<p><a href="${segment.card.url}">${segment.card.title}</a></p>`;
       case 'reference_block':
-        return `<h2>参考</h2><ol>${segment.reference_block.items.map((item, index) => `<li id="ref__${index}">${replaceMarks(item.text, item.marks)}</li>`).join('\n')}</ol>`;
+        return `<h2>参考</h2><ol class="references">${segment.reference_block.items.map(
+          (item, index) => `<li id="ref__${index}">${replaceMarks(item.text, item.marks)}<a href="#reflink__${index}">⏎</a></li>`
+        ).join('\n')}</ol>`;
       case 'video':
         return `<video src="${segment.video.url}" controls></video>`;
       case 'code_block':

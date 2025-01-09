@@ -85,6 +85,9 @@ const template = createTemplate`
     a[data-draft-type="link-card"] {
       display: block;
     }
+    .references {
+      font-size: 0.85em;
+    }
   </style>
 </head>
 <body style="max-width: 1000px; margin: 0 auto; padding: 0 1em 0 1em;" class="yue">
