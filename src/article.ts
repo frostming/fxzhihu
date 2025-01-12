@@ -1,4 +1,4 @@
-import { createTemplate, FetchError, Segment, renderSegments, SegmentType } from "./lib";
+import { createTemplate, Segment, renderSegments, SegmentType, withCache } from "./lib";
 
 export type Article = {
   header: {
@@ -124,14 +124,11 @@ const template = createTemplate`
 
 export async function article(id: string, redirect: boolean, env: Env): Promise<string> {
   const url = new URL(id, `https://api.zhihu.com/articles/v2/`);
-  const response = await fetch(url, {
+  const response = await withCache(fetch)(url, {
     "headers": {
       "user-agent": "node",
     },
   });
-  if (!response.ok) {
-    throw new FetchError(response.statusText, response);
-  }
   const data = await response.json<Article>();
 
   return template({
