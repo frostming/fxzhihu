@@ -285,7 +285,7 @@ export function withCache(fetcher: typeof fetch = fetch): typeof fetch {
         statusText: responseToCache.statusText,
         headers: {
           ...Object.fromEntries(responseToCache.headers.entries()),
-          'Cache-Control': 'max-age=86400'
+          'Cache-Control': 's-maxage=86400'
         }
       });
       await cache.put(url, newResponse);
