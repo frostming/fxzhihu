@@ -1,5 +1,5 @@
 import { Question } from "./question";
-import { fixImagesAndLinks, createTemplate, extractReference, FetchError } from "./lib";
+import { fixImagesAndLinks, createTemplate, extractReference, fetchWithCache } from "./lib";
 
 export type Answer = {
   content: string;
@@ -98,10 +98,7 @@ const questionTemplate = createTemplate`
 
 export async function answer(id: string, redirect: boolean, env: Env): Promise<string> {
   const url = `https://api.zhihu.com/v4/answers/${id}?include=content%2Cexcerpt%2Cauthor%2Cvoteup_count%2Ccomment_count%2Cquestion%2Ccreated_time%2Cquestion.detail`;
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new FetchError(response.statusText, response);
-  }
+  const response = await fetchWithCache(url);
   const data = await response.json<Answer>();
   const createdTime = new Date(data.created_time * 1000);
 

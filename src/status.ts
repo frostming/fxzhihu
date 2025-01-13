@@ -1,4 +1,4 @@
-import { fixImagesAndLinks, createTemplate, extractReference, FetchError } from './lib';
+import { fixImagesAndLinks, createTemplate, extractReference, fetchWithCache } from './lib';
 
 const ZHIHU_HOST = 'https://www.zhihu.com';
 
@@ -184,10 +184,7 @@ const videoContentTemplate = createTemplate`
 
 export async function status(id: string, redirect: boolean, env: Env): Promise<string> {
   const url = new URL(id, `https://www.zhihu.com/api/v4/pins/`);
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new FetchError(response.statusText, response);
-  }
+  const response = await fetchWithCache(url);
   const data = await response.json<Status>();
   const createdTime = new Date(data.created * 1000);
   const updatedTime = new Date(data.updated * 1000);
