@@ -268,28 +268,26 @@ export function renderSegments(segments: Segment<SegmentType>[]): string {
   }).join('');
 }
 
-export function withCache(fetcher: typeof fetch = fetch): typeof fetch {
-  return async (url, init) => {
-    const cache = caches.default;
-    let response = await cache.match(url);
+export async function fetchWithCache(url: RequestInfo, init?: RequestInit): Promise<Response> {
+  const cache = caches.default;
+  let response = await cache.match(url);
 
-    if (!response) {
-      response = await fetcher(url, init);
-      if (!response.ok) {
-        throw new FetchError(response.statusText, response);
-      }
-      // Cache the response with a 1 day expiration
-      const responseToCache = response.clone();
-      const newResponse = new Response(responseToCache.body, {
-        status: responseToCache.status,
-        statusText: responseToCache.statusText,
-        headers: {
-          ...Object.fromEntries(responseToCache.headers.entries()),
-          'Cache-Control': 's-maxage=86400'
-        }
-      });
-      await cache.put(url, newResponse);
+  if (!response) {
+    response = await fetch(url, init);
+    if (!response.ok) {
+      throw new FetchError(response.statusText, response);
     }
-    return response;
-  };
-}
+    // Cache the response with a 1 day expiration
+    const responseToCache = response.clone();
+    const newResponse = new Response(responseToCache.body, {
+      status: responseToCache.status,
+      statusText: responseToCache.statusText,
+      headers: {
+        ...Object.fromEntries(responseToCache.headers.entries()),
+        'Cache-Control': 's-maxage=86400'
+      }
+    });
+    await cache.put(url, newResponse);
+  }
+  return response;
+};
