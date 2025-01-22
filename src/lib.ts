@@ -76,7 +76,7 @@ export async function extractReference(html: string) {
   return ''
 }
 
-export class FetchError extends Error {
+class FetchError extends Error {
   response?: Response;
 
   constructor(message: string, response?: Response) {
@@ -267,3 +267,27 @@ export function renderSegments(segments: Segment<SegmentType>[]): string {
     }
   }).join('');
 }
+
+export async function fetchWithCache(url: RequestInfo, init?: RequestInit): Promise<Response> {
+  const cache = caches.default;
+  let response = await cache.match(url);
+
+  if (!response) {
+    response = await fetch(url, init);
+    if (!response.ok) {
+      throw new FetchError(response.statusText, response);
+    }
+    // Cache the response with a 1 day expiration
+    const responseToCache = response.clone();
+    const newResponse = new Response(responseToCache.body, {
+      status: responseToCache.status,
+      statusText: responseToCache.statusText,
+      headers: {
+        ...Object.fromEntries(responseToCache.headers.entries()),
+        'Cache-Control': 's-maxage=86400'
+      }
+    });
+    await cache.put(url, newResponse);
+  }
+  return response;
+};

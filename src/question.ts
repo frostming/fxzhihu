@@ -1,4 +1,4 @@
-import { createTemplate, FetchError } from "./lib";
+import { createTemplate, fetchWithCache } from "./lib";
 
 export type Question = {
   type: 'question';
@@ -51,15 +51,12 @@ const template = createTemplate`
 `;
 
 export async function question(id: string, redirect: boolean, env: Env): Promise<string> {
-  const response = await fetch(`https://api.zhihu.com/questions/${id}?include=detail%2Cexcerpt%2Canswer_count%2Cauthor`, {
+  const response = await fetchWithCache(`https://api.zhihu.com/questions/${id}?include=detail%2Cexcerpt%2Canswer_count%2Cauthor`, {
     headers: {
       cookie: `__zse_ck=${env.ZSE_CK}`,
       'user-agent': 'node'
     },
   });
-  if (!response.ok) {
-    throw new FetchError(response.statusText, response);
-  }
 
   const data = await response.json<Question>();
   const createdTime = new Date(data.created * 1000);
