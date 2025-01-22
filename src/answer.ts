@@ -51,6 +51,7 @@ const template = createTemplate`
         .author {
             display: flex;
             gap: 1em;
+            align-items: center;
         }
         #avatar {
             width: 100px;
@@ -60,7 +61,7 @@ const template = createTemplate`
             flex: 1;
         }
         a[data-draft-type="link-card"] {
-           display: block;
+            display: block;
         }
     </style>
 </head>
@@ -70,10 +71,10 @@ const template = createTemplate`
         <div class="author">
             <img class="avatar" id="avatar" src="${"avatar_url"}" />
             <div>
-                <h2 rel="author">
+                <h3 rel="author">
                     <a href="${"author_url"}" target="_blank">@${"author"}</a>
-                </h2>
-                <p> ${"headline"} </p>
+                </h3>
+                <div>${"headline"}</div>
             </div>
         </div>
         <time datetime="${"created_time"}">发表于 ${"created_time_formatted"}</time>
