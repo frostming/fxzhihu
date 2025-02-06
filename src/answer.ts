@@ -27,7 +27,7 @@ const template = createTemplate`
     <meta property="og:site_name" content="FxZhihu / Fixup Zhihu">
     <meta property="og:description" itemprop="description" content="${"excerpt"}">
     <meta property="og:url" content="${"url"}">
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/yue.css@0.4.0/yue.css">
+	<link rel="stylesheet" href="https://gcore.jsdelivr.net/npm/yue.css@0.4.0/yue.css">
     <meta name="twitter:card" content="summary">
 	<meta name="twitter:site" content="FxZhihu" />
 	<meta name="twitter:creator" content="@${"author"}" />
