@@ -28,7 +28,7 @@ const template = createTemplate`
 	<meta name="twitter:site" content="FxZhihu" />
 	<meta name="twitter:creator" content="@${"author"}" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/yue.css@0.4.0/yue.css">
+	<link rel="stylesheet" href="https://gcore.jsdelivr.net/npm/yue.css@0.4.0/yue.css">
   <script>
     const redirect = ${"redirect"};
     if (redirect) {
