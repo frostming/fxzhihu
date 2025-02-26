@@ -141,6 +141,7 @@ async function parseHTML(text: string, id: string) {
 
 export async function article(id: string, redirect: boolean, env: Env): Promise<string> {
   const url = new URL(id, `https://zhuanlan.zhihu.com/p/`).href;
+  console.log(`ZSE_CK: ${env.ZSE_CK}`);
   const response = await fetchWithCache(url, {
     "headers": {
       "user-agent": "node",
