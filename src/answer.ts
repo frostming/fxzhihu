@@ -1,19 +1,49 @@
 import { Question } from "./question";
 import { fixImagesAndLinks, createTemplate, extractReference, fetchWithCache } from "./lib";
 
-export type Answer = {
-  content: string;
-  excerpt: string;
-  author: {
-    name: string;
-    url: string;
-    headline: string;
-    avatar_url: string;
+type InitialData = {
+  initialState: {
+    entities: {
+      answers: {
+        [id: string]: {
+          content: string;
+          createdTime: number;
+          excerpt: string;
+          voteupCount: number;
+          commentCount: number;
+          url: string;
+          author: {
+            id: string;
+            name: string;
+            headline: string;
+            url: string;
+            avatarUrl: string;
+          };
+          question: {
+            id: string;
+            title: string;
+          };
+        };
+      };
+      questions: {
+        [id: string]: Question;
+      };
+    };
   };
-  voteup_count: number;
-  comment_count: number;
-  question: Question;
-  created_time: number;
+};
+
+async function parseHTML(text: string, id: string) {
+  let script = '';
+  const rewriter = new HTMLRewriter()
+    .on('script#js-initialData', {
+      text(text) {
+        script += text.text;
+      }
+    })
+
+  await rewriter.transform(new Response(text)).text();
+  const initialData = JSON.parse(script || '{}') as InitialData;
+  return { answer: initialData.initialState.entities.answers[id], question: initialData.initialState.entities.questions[initialData.initialState.entities.answers[id].question.id] };
 }
 
 const template = createTemplate`
@@ -97,29 +127,34 @@ const questionTemplate = createTemplate`
     <hr>
 `;
 
-export async function answer(id: string, redirect: boolean, env: Env): Promise<string> {
-  const url = `https://api.zhihu.com/v4/answers/${id}?include=content%2Cexcerpt%2Cauthor%2Cvoteup_count%2Ccomment_count%2Cquestion%2Ccreated_time%2Cquestion.detail`;
-  const response = await fetchWithCache(url);
-  const data = await response.json<Answer>();
-  const createdTime = new Date(data.created_time * 1000);
+export async function answer(id: string, redirect: boolean, env: Env, qid: string): Promise<string> {
+  const url = `https://www.zhihu.com/question/${qid}/answer/${id}`;
+  const response = await fetchWithCache(url, {
+    "headers": {
+      "user-agent": "node",
+      "cookie": `__zse_ck=${env.ZSE_CK}`,
+    },
+  });
+  const { answer: data, question } = await parseHTML(await response.text(), id);
+  const createdTime = new Date(data.createdTime * 1000);
 
   return template({
     title: data.question.title,
-    url: new URL(`${data.question.id}/answer/${id}`, `https://www.zhihu.com/question/`).href,
+    url: data.url,
     content: await fixImagesAndLinks(data.content),
     reference: await extractReference(data.content),
     excerpt: data.excerpt,
     author: data.author.name,
     created_time: createdTime.toISOString(),
     created_time_formatted: createdTime.toDateString(),
-    voteup_count: data.voteup_count.toString(),
-    comment_count: data.comment_count.toString(),
-    question: data.question.detail.trim().length > 0 ? questionTemplate({
-      question: await fixImagesAndLinks(data.question.detail),
+    voteup_count: data.voteupCount.toString(),
+    comment_count: data.commentCount.toString(),
+    question: question.detail.trim().length > 0 ? questionTemplate({
+      question: await fixImagesAndLinks(question.detail),
     }) : '',
     redirect: redirect ? 'true' : 'false',
-    author_url: data.author.url.replace("api.", ""),
+    author_url: data.author.url.replace("/api/v4", ""),
     headline: data.author.headline,
-    avatar_url: data.author.avatar_url,
+    avatar_url: data.author.avatarUrl,
   });
 }

@@ -1,38 +1,33 @@
-import { createTemplate, Segment, renderSegments, SegmentType, fetchWithCache } from "./lib";
+import { createTemplate, extractReference, fetchWithCache, fixImagesAndLinks } from "./lib";
 
-export type Article = {
-  header: {
-    text: string;
-  };
-  structured_content: { segments: Segment<SegmentType>[] };
-  excerpt: string;
-  author: {
-    fullname: string;
-    description: string;
-    avatar: {
-      avatar_image: {
-        day: string;
-        jump_url: string;
-      };
-    };
-  };
-  content_end_info: {
-    create_time_text: string;
-  };
-  reaction: {
-    statistics: {
-      up_vote_count: number;
-      comment_count: number;
-    };
+type InitialData = {
+  initialState: {
+    entities: {
+      articles: {
+        [id: string]: {
+          title: string;
+          url: string;
+          imageUrl: string;
+          content: string;
+          created: number;
+          updated: number;
+          author: {
+            name: string;
+            description: string;
+            url: string;
+            avatarUrl: string;
+          };
+          column?: {
+            description: string;
+            intro: string;
+            title: string;
+          };
+          voteupCount: number;
+          commentCount: number;
+        }
+      }
+    }
   }
-  cover_image?: {
-    url: string;
-  };
-  third_business: {
-    column?: {
-      title: string;
-    };
-  };
 }
 
 const template = createTemplate`
@@ -113,6 +108,7 @@ const template = createTemplate`
   </header>
   <article>
     ${"content"}
+    ${"reference"}
     <hr>
     <div class="column" style="margin: 1em 0; padding: 0.5em 1em; border: 2px solid #999; border-radius: 5px;">
       <h2>专栏：${"column_title"}</h2>
@@ -123,31 +119,53 @@ const template = createTemplate`
 </html>
 `;
 
+async function parseHTML(text: string, id: string) {
+  let excerpt = '';
+  let script = '';
+  const rewriter = new HTMLRewriter()
+    .on('meta[name="description"]', {
+      element(element) {
+        excerpt = element.getAttribute('content') || '';
+      }
+    })
+    .on('script#js-initialData', {
+      text(text) {
+        script += text.text;
+      }
+    })
+
+  await rewriter.transform(new Response(text)).text();
+  const articleData = (JSON.parse(script || '{}') as InitialData).initialState.entities.articles[id];
+  return { articleData, excerpt };
+}
+
 export async function article(id: string, redirect: boolean, env: Env): Promise<string> {
-  const url = new URL(id, `https://api.zhihu.com/articles/v2/`);
+  const url = new URL(id, `https://zhuanlan.zhihu.com/p/`).href;
   const response = await fetchWithCache(url, {
     "headers": {
       "user-agent": "node",
+      "cookie": `__zse_ck=${env.ZSE_CK}`,
     },
   });
-  const data = await response.json<Article>();
-
+  const { articleData, excerpt } = await parseHTML(await response.text(), id);
+  const createdTime = new Date(articleData.created * 1000);
   return template({
-    title: data.header.text,
-    url: new URL(id, `https://zhuanlan.zhihu.com/p/`).href,
-    content: renderSegments(data.structured_content.segments),
-    excerpt: data.excerpt,
-    author: data.author.fullname,
-    created_time: data.content_end_info.create_time_text,
-    created_time_formatted: data.content_end_info.create_time_text,
-    voteup_count: data.reaction.statistics.up_vote_count.toString(),
-    comment_count: data.reaction.statistics.comment_count.toString(),
-    column_title: data.third_business.column?.title ?? '',
-    column_description: '',
+    title: articleData.title,
+    url: articleData.url,
+    content: await fixImagesAndLinks(articleData.content),
+    reference: await extractReference(articleData.content),
+    excerpt: excerpt,
+    author: articleData.author.name,
+    created_time: createdTime.toISOString(),
+    created_time_formatted: createdTime.toLocaleString(),
+    voteup_count: articleData.voteupCount.toString(),
+    comment_count: articleData.commentCount.toString(),
+    column_title: articleData.column?.title ?? '',
+    column_description: articleData.column?.description ?? '',
     redirect: redirect ? 'true' : 'false',
-    author_url: data.author.avatar.avatar_image.jump_url,
-    headline: data.author.description,
-    avatar_url: data.author.avatar.avatar_image.day,
-    image_url: data.cover_image?.url ?? '',
+    author_url: `https://www.zhihu.com${articleData.author.url}`,
+    headline: articleData.author.description,
+    avatar_url: articleData.author.avatarUrl,
+    image_url: articleData.imageUrl,
   });
 }
