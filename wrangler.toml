@@ -30,6 +30,7 @@ enabled = true
 [vars]
 API_URL = "https://www.fxzhihu.com"
 ARTICLE_URL = "https://zhuanlan.fxzhihu.com"
+ENABLE_PROXY = "true"
 
 [env.development]
 vars = { API_URL = "http://localhost:8787", ARTICLE_URL = "http://localhost:8787" }

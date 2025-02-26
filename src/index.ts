@@ -44,46 +44,48 @@ Allow: /answer/*
 `);
     }
 
-    for (const { urlPattern, pageFunction } of [
-      { urlPattern: new URLPattern({ pathname: "/question/:qid(\\d+)/answer/:id(\\d+)" }), pageFunction: answer },
-      { urlPattern: new URLPattern({ pathname: "/p/:id(\\d+)" }), pageFunction: article },
-      { urlPattern: new URLPattern({ pathname: "/question/:id(\\d+)" }), pageFunction: question },
-      { urlPattern: new URLPattern({ pathname: "/pin/:id(\\d+)" }), pageFunction: status },
-    ]) {
-      let match = urlPattern.test(url);
-      if (match) {
-        const id = urlPattern.exec(url)?.pathname.groups?.id!;
-        const qid = urlPattern.exec(url)?.pathname.groups?.qid;
-        try {
-          let responseContent: string;
-          if (qid !== undefined) {
-            responseContent = await pageFunction(id, redirect, env, qid);
-          } else {
-            // @ts-expect-error
-            responseContent = await pageFunction(id, redirect, env);
-          }
-          return new Response(await TransformUrl(responseContent, env), {
-            headers: {
-              'Content-Type': 'text/html',
-            },
-          });
-        } catch (e: any) {
-          // add traceback
-          console.error(e);
-          if (e.response && (e.code as number) === 4041) {
-            return new Response(errorPage(e), {
+    if (env.ENABLE_PROXY !== 'false') {
+      for (const { urlPattern, pageFunction } of [
+        { urlPattern: new URLPattern({ pathname: "/question/:qid(\\d+)/answer/:id(\\d+)" }), pageFunction: answer },
+        { urlPattern: new URLPattern({ pathname: "/p/:id(\\d+)" }), pageFunction: article },
+        { urlPattern: new URLPattern({ pathname: "/question/:id(\\d+)" }), pageFunction: question },
+        { urlPattern: new URLPattern({ pathname: "/pin/:id(\\d+)" }), pageFunction: status },
+      ]) {
+        let match = urlPattern.test(url);
+        if (match) {
+          const id = urlPattern.exec(url)?.pathname.groups?.id!;
+          const qid = urlPattern.exec(url)?.pathname.groups?.qid;
+          try {
+            let responseContent: string;
+            if (qid !== undefined) {
+              responseContent = await pageFunction(id, redirect, env, qid);
+            } else {
+              // @ts-expect-error
+              responseContent = await pageFunction(id, redirect, env);
+            }
+            return new Response(await TransformUrl(responseContent, env), {
               headers: {
                 'Content-Type': 'text/html',
               },
             });
+          } catch (e: any) {
+            // add traceback
+            console.error(e);
+            if (e.response && (e.code as number) === 4041) {
+              return new Response(errorPage(e), {
+                headers: {
+                  'Content-Type': 'text/html',
+                },
+              });
+            }
+            return e.response || new Response(e.message, { status: 500 });
           }
-          return e.response || new Response(e.message, { status: 500 });
         }
       }
     }
 
     // Redirect to the same URL under zhihu.com
-    const zhihuUrl = new URL(path, `https://www.zhihu.com`).href;
+    const zhihuUrl = new URL(path, path.startsWith('/p/') ? `https://zhuanlan.zhihu.com` : `https://www.zhihu.com`).href;
     return Response.redirect(zhihuUrl, 302);
   },
 } satisfies ExportedHandler<Env>;
