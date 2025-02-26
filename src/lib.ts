@@ -50,10 +50,10 @@ export async function extractReference(html: string) {
     .on('sup', {
       element(element) {
         const text = element.getAttribute('data-text')
-        const url = element.getAttribute('data-url')
+        const url = element.getAttribute('data-url') || ''
         const numero = element.getAttribute('data-numero')
 
-        if (text && url && numero) {
+        if (text && numero) {
           references.set(numero, { text, url })
         }
       }
@@ -66,10 +66,10 @@ export async function extractReference(html: string) {
   if (references.size > 0) {
     const referenceList = Array.from(references.entries())
       .sort(([a], [b]) => parseInt(a) - parseInt(b))
-      .map(([index, { text, url }]) => `${index}. ${text} <a href="${url}">${url}</a>`)
-      .join('<br>')
+      .map(([index, { text, url }]) => `<li>${text}${url ? `<a href="${url}">${url}</a>` : ''}</li>`)
+      .join('\n');
 
-    return `<hr><section><h2>参考</h2>${referenceList}</section>`
+    return `<hr><section><h2>参考</h2><ol>${referenceList}</ol></section>`
   }
 
   // Return empty string if no references found

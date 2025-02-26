@@ -45,8 +45,7 @@ Allow: /answer/*
     }
 
     for (const { urlPattern, pageFunction } of [
-      { urlPattern: new URLPattern({ pathname: "/question/:_id(\\d+)/answer/:id(\\d+)" }), pageFunction: answer },
-      { urlPattern: new URLPattern({ pathname: "/answer/:id(\\d+)" }), pageFunction: answer },
+      { urlPattern: new URLPattern({ pathname: "/question/:qid(\\d+)/answer/:id(\\d+)" }), pageFunction: answer },
       { urlPattern: new URLPattern({ pathname: "/p/:id(\\d+)" }), pageFunction: article },
       { urlPattern: new URLPattern({ pathname: "/question/:id(\\d+)" }), pageFunction: question },
       { urlPattern: new URLPattern({ pathname: "/pin/:id(\\d+)" }), pageFunction: status },
@@ -54,8 +53,16 @@ Allow: /answer/*
       let match = urlPattern.test(url);
       if (match) {
         const id = urlPattern.exec(url)?.pathname.groups?.id!;
+        const qid = urlPattern.exec(url)?.pathname.groups?.qid;
         try {
-          return new Response(await TransformUrl((await pageFunction(id, redirect, env)), env), {
+          let responseContent: string;
+          if (qid !== undefined) {
+            responseContent = await pageFunction(id, redirect, env, qid);
+          } else {
+            // @ts-expect-error
+            responseContent = await pageFunction(id, redirect, env);
+          }
+          return new Response(await TransformUrl(responseContent, env), {
             headers: {
               'Content-Type': 'text/html',
             },

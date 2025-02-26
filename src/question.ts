@@ -7,9 +7,22 @@ export type Question = {
   detail: string;
   excerpt: string;
   created: number;
-  answer_count: number;
+  answerCount: number;
   author: {
     name: string;
+    url: string;
+    avatarUrl: string;
+    headline: string;
+  };
+};
+
+type InitialData = {
+  initialState: {
+    entities: {
+      questions: {
+        [id: string]: Question;
+      };
+    };
   };
 };
 
@@ -50,15 +63,29 @@ const template = createTemplate`
 </html>
 `;
 
+async function parseHTML(text: string, id: string) {
+  let script = '';
+  const rewriter = new HTMLRewriter()
+    .on('script#js-initialData', {
+      text(text) {
+        script += text.text;
+      }
+    })
+
+  await rewriter.transform(new Response(text)).text();
+  const initialData = JSON.parse(script || '{}') as InitialData;
+  return { question: initialData.initialState.entities.questions[id] };
+}
+
 export async function question(id: string, redirect: boolean, env: Env): Promise<string> {
-  const response = await fetchWithCache(`https://api.zhihu.com/questions/${id}?include=detail%2Cexcerpt%2Canswer_count%2Cauthor`, {
-    headers: {
-      cookie: `__zse_ck=${env.ZSE_CK}`,
-      'user-agent': 'node'
+  const url = `https://www.zhihu.com/question/${id}`;
+  const response = await fetchWithCache(url, {
+    "headers": {
+      "user-agent": "node",
+      "cookie": `__zse_ck=${env.ZSE_CK}`,
     },
   });
-
-  const data = await response.json<Question>();
+  const { question: data } = await parseHTML(await response.text(), id);
   const createdTime = new Date(data.created * 1000);
 
   return template({
@@ -66,7 +93,7 @@ export async function question(id: string, redirect: boolean, env: Env): Promise
     author: data.author.name,
     created_time: createdTime.toISOString(),
     created_time_formatted: createdTime.toDateString(),
-    answer_count: data.answer_count.toString(),
+    answer_count: data.answerCount.toString(),
     content: data.detail,
     redirect: redirect ? 'true' : 'false',
     url: new URL(id, `https://www.zhihu.com/question/`).href,
