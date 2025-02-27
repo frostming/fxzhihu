@@ -8,7 +8,7 @@
 // @match        https://www.zhihu.com/*
 // @match        https://zhuanlan.zhihu.com/*
 // @grant        none
-// @icon         https://cdn.jsdelivr.net/gh/frostming/fxzhihu_bot/zhihu.webp
+// @icon         https://gcore.jsdelivr.net/gh/frostming/fxzhihu_bot/zhihu.webp
 // ==/UserScript==
 
 function createFxZhihuButton(link) {
