@@ -1,30 +1,33 @@
-import { createTemplate, extractReference, fetchWithCache, fixImagesAndLinks } from "./lib";
+import { createTemplate, extractReference, fetchWithCache, fixImagesAndLinks, KeysToCamelCase, stripHtmlTags } from "./lib";
+
+type IArticle = {
+  title: string;
+  url: string;
+  image_url: string;
+  excerpt: string;
+  content: string;
+  created: number;
+  updated: number;
+  author: {
+    name: string;
+    description: string;
+    url: string;
+    avatar_url: string;
+  };
+  column?: {
+    description: string;
+    intro: string;
+    title: string;
+  };
+  voteup_count: number;
+  comment_count: number;
+};
 
 type InitialData = {
   initialState: {
     entities: {
       articles: {
-        [id: string]: {
-          title: string;
-          url: string;
-          imageUrl: string;
-          content: string;
-          created: number;
-          updated: number;
-          author: {
-            name: string;
-            description: string;
-            url: string;
-            avatarUrl: string;
-          };
-          column?: {
-            description: string;
-            intro: string;
-            title: string;
-          };
-          voteupCount: number;
-          commentCount: number;
-        }
+          [id: string]: KeysToCamelCase<IArticle>;
       }
     }
   }
@@ -140,33 +143,32 @@ async function parseHTML(text: string, id: string) {
 }
 
 export async function article(id: string, redirect: boolean, env: Env): Promise<string> {
-  const url = new URL(id, `https://zhuanlan.zhihu.com/p/`).href;
-  console.log(`ZSE_CK: ${env.ZSE_CK}`);
+  const url = new URL(id, `https://www.zhihu.com/api/v4/articles/`).href;
   const response = await fetchWithCache(url, {
     "headers": {
       "user-agent": "node",
-      "cookie": `__zse_ck=${env.ZSE_CK}`,
+      "cookie": `z_c0=${env.Z_C0}`,
     },
   });
-  const { articleData, excerpt } = await parseHTML(await response.text(), id);
+  const articleData = await response.json() as IArticle;
   const createdTime = new Date(articleData.created * 1000);
   return template({
     title: articleData.title,
     url: articleData.url,
     content: await fixImagesAndLinks(articleData.content),
     reference: await extractReference(articleData.content),
-    excerpt: excerpt,
+    excerpt: stripHtmlTags(articleData.excerpt),
     author: articleData.author.name,
     created_time: createdTime.toISOString(),
     created_time_formatted: createdTime.toLocaleString(),
-    voteup_count: articleData.voteupCount.toString(),
-    comment_count: articleData.commentCount.toString(),
+    voteup_count: articleData.voteup_count.toString(),
+    comment_count: articleData.comment_count.toString(),
     column_title: articleData.column?.title ?? '',
     column_description: articleData.column?.description ?? '',
     redirect: redirect ? 'true' : 'false',
     author_url: `https://www.zhihu.com${articleData.author.url}`,
     headline: articleData.author.description,
-    avatar_url: articleData.author.avatarUrl,
-    image_url: articleData.imageUrl,
+    avatar_url: articleData.author.avatar_url,
+    image_url: articleData.image_url,
   });
 }

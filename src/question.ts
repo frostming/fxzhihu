@@ -1,4 +1,4 @@
-import { createTemplate, fetchWithCache } from "./lib";
+import { createTemplate, fetchWithCache, KeysToCamelCase } from "./lib";
 
 export type Question = {
   type: 'question';
@@ -7,11 +7,11 @@ export type Question = {
   detail: string;
   excerpt: string;
   created: number;
-  answerCount: number;
+  answer_count: number;
   author: {
     name: string;
     url: string;
-    avatarUrl: string;
+    avatar_url: string;
     headline: string;
   };
 };
@@ -20,7 +20,7 @@ type InitialData = {
   initialState: {
     entities: {
       questions: {
-        [id: string]: Question;
+        [id: string]: KeysToCamelCase<Question>;
       };
     };
   };
@@ -78,14 +78,14 @@ async function parseHTML(text: string, id: string) {
 }
 
 export async function question(id: string, redirect: boolean, env: Env): Promise<string> {
-  const url = `https://www.zhihu.com/question/${id}`;
+  const url = `https://www.zhihu.com/api/v4/questions/${id}?include=detail,excerpt,author,answer_count`;
   const response = await fetchWithCache(url, {
     "headers": {
       "user-agent": "node",
-      "cookie": `__zse_ck=${env.ZSE_CK}`,
+      // "cookie": `__zse_ck=${env.ZSE_CK}`,
     },
   });
-  const { question: data } = await parseHTML(await response.text(), id);
+  const data = await response.json() as Question;
   const createdTime = new Date(data.created * 1000);
 
   return template({
@@ -93,7 +93,7 @@ export async function question(id: string, redirect: boolean, env: Env): Promise
     author: data.author.name,
     created_time: createdTime.toISOString(),
     created_time_formatted: createdTime.toDateString(),
-    answer_count: data.answerCount.toString(),
+    answer_count: data.answer_count.toString(),
     content: data.detail,
     redirect: redirect ? 'true' : 'false',
     url: new URL(id, `https://www.zhihu.com/question/`).href,

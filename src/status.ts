@@ -184,7 +184,7 @@ const videoContentTemplate = createTemplate`
 <video controls="controls" src="${'videoUrl'}">`;
 
 export async function status(id: string, redirect: boolean, env: Env): Promise<string> {
-  const url = new URL(id, `https://www.zhihu.com/api/v4/pins/`);
+  const url = new URL(id, `https://www.zhihu.com/api/v4/pins/`).href;
   const response = await fetchWithCache(url);
   const data = await response.json<Status>();
   const createdTime = new Date(data.created * 1000);

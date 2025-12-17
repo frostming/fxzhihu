@@ -1,32 +1,35 @@
 import { Question } from "./question";
-import { fixImagesAndLinks, createTemplate, extractReference, fetchWithCache } from "./lib";
+import { fixImagesAndLinks, createTemplate, extractReference, fetchWithCache, KeysToCamelCase } from "./lib";
+
+type IAnswer = {
+  content: string;
+  created_time: number;
+  excerpt: string;
+  voteup_count: number;
+  comment_count: number;
+  url: string;
+  author: {
+    id: string;
+    name: string;
+    headline: string;
+    url: string;
+    avatar_url: string;
+  };
+  question: {
+    id: string;
+    title: string;
+    detail: string;
+  };
+};
 
 type InitialData = {
   initialState: {
     entities: {
       answers: {
-        [id: string]: {
-          content: string;
-          createdTime: number;
-          excerpt: string;
-          voteupCount: number;
-          commentCount: number;
-          url: string;
-          author: {
-            id: string;
-            name: string;
-            headline: string;
-            url: string;
-            avatarUrl: string;
-          };
-          question: {
-            id: string;
-            title: string;
-          };
-        };
+        [id: string]: KeysToCamelCase<IAnswer>;
       };
       questions: {
-        [id: string]: Question;
+        [id: string]: KeysToCamelCase<Question>;
       };
     };
   };
@@ -128,33 +131,34 @@ const questionTemplate = createTemplate`
 `;
 
 export async function answer(id: string, redirect: boolean, env: Env, qid: string): Promise<string> {
-  const url = `https://www.zhihu.com/question/${qid}/answer/${id}`;
+  const url = `https://www.zhihu.com/api/v4/answers/${id}?include=content,excerpt,voteup_count,comment_count,question.detail`;
   const response = await fetchWithCache(url, {
-    "headers": {
+    headers: {
       "user-agent": "node",
-      "cookie": `__zse_ck=${env.ZSE_CK}`,
+      "cookie": `z_c0=${env.Z_C0}`,
     },
   });
-  const { answer: data, question } = await parseHTML(await response.text(), id);
-  const createdTime = new Date(data.createdTime * 1000);
+  const answerData = await response.json() as IAnswer;
+  const { question } = answerData;
+  const createdTime = new Date(answerData.created_time * 1000);
 
   return template({
-    title: data.question.title,
-    url: data.url,
-    content: await fixImagesAndLinks(data.content),
-    reference: await extractReference(data.content),
-    excerpt: data.excerpt,
-    author: data.author.name,
+    title: answerData.question.title,
+    url: answerData.url,
+    content: await fixImagesAndLinks(answerData.content),
+    reference: await extractReference(answerData.content),
+    excerpt: answerData.excerpt,
+    author: answerData.author.name,
     created_time: createdTime.toISOString(),
     created_time_formatted: createdTime.toDateString(),
-    voteup_count: data.voteupCount.toString(),
-    comment_count: data.commentCount.toString(),
+    voteup_count: answerData.voteup_count.toString(),
+    comment_count: answerData.comment_count.toString(),
     question: question.detail.trim().length > 0 ? questionTemplate({
       question: await fixImagesAndLinks(question.detail),
     }) : '',
     redirect: redirect ? 'true' : 'false',
-    author_url: data.author.url.replace("/api/v4", ""),
-    headline: data.author.headline,
-    avatar_url: data.author.avatarUrl,
+    author_url: answerData.author.url.replace("/api/v4", ""),
+    headline: answerData.author.headline,
+    avatar_url: answerData.author.avatar_url,
   });
 }

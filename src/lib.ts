@@ -291,3 +291,12 @@ export async function fetchWithCache(url: RequestInfo, init?: RequestInit): Prom
   }
   return response;
 };
+
+type toCamelCase<S extends string> = S extends `${infer T}_${infer U}` ? `${T}${Capitalize<toCamelCase<U>>}` : S;
+export type KeysToCamelCase<T> = {
+  [K in keyof T as toCamelCase<K & string>]: T[K] extends object ? KeysToCamelCase<T[K]> : T[K];
+};
+
+export function stripHtmlTags(html: string): string {
+  return html.replace(/<[^>]*>/g, '');
+}
