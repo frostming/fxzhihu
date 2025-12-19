@@ -118,6 +118,11 @@ const template = createTemplate`
         ${"content"}
         ${"reference"}
     </article>
+    <footer>
+        <p style="color: #999; font-size: 0.85em; text-align: center; margin-top: 2em;">
+            本页面由 <a href="https://github.com/frostming/fxzhihu" target="_blank">FxZhihu</a> 生成。<br>
+        </p>
+    </footer>
 </body>
 </html>
 `;
