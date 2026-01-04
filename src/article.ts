@@ -159,7 +159,7 @@ export async function article(id: string, redirect: boolean, env: Env): Promise<
   const createdTime = new Date(articleData.created * 1000);
   return template({
     title: articleData.title,
-    url: articleData.url,
+    url: articleData.url.replace("api", "zhuanlan").replace("articles", "p"),
     content: await fixImagesAndLinks(articleData.content),
     reference: await extractReference(articleData.content),
     excerpt: stripHtmlTags(articleData.excerpt),
@@ -171,7 +171,7 @@ export async function article(id: string, redirect: boolean, env: Env): Promise<
     column_title: articleData.column?.title ?? '',
     column_description: articleData.column?.description ?? '',
     redirect: redirect ? 'true' : 'false',
-    author_url: `https://www.zhihu.com${articleData.author.url}`,
+    author_url: articleData.author.url.replace("api", "www"),
     headline: articleData.author.description,
     avatar_url: articleData.author.avatar_url,
     image_url: articleData.image_url,

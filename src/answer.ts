@@ -149,7 +149,7 @@ export async function answer(id: string, redirect: boolean, env: Env, qid: strin
 
   return template({
     title: answerData.question.title,
-    url: answerData.url,
+    url: answerData.url.replace("api/v4/", "").replace("answers", "answer"),
     content: await fixImagesAndLinks(answerData.content),
     reference: await extractReference(answerData.content),
     excerpt: answerData.excerpt,
