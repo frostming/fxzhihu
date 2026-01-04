@@ -277,14 +277,14 @@ export async function fetchWithCache(url: RequestInfo, init?: RequestInit): Prom
     if (!response.ok) {
       throw new FetchError(response.statusText, response);
     }
-    // Cache the response with a 1 day expiration
+    // Cache the response with a 100 day expiration
     const responseToCache = response.clone();
     const newResponse = new Response(responseToCache.body, {
       status: responseToCache.status,
       statusText: responseToCache.statusText,
       headers: {
         ...Object.fromEntries(responseToCache.headers.entries()),
-        'Cache-Control': 's-maxage=86400'
+        'Cache-Control': 's-maxage=8640000'
       }
     });
     await cache.put(url, newResponse);
