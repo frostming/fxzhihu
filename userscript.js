@@ -13,8 +13,8 @@
 
 function createFxZhihuButton(link) {
     const previewLink = link.replace('.zhihu.com', '.fxzhihu.com');
-
     const button = document.createElement('a');
+  
     button.textContent = '复制预览链接';
     button.className = 'fxzhihu-button';
     button.style.cssText = `
