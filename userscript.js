@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Zhihu Link Fixer
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.2
 // @author       Frost Ming
 // @license      MIT
 // @description  Adds a button beside Zhihu answer links to open them in FxZhihu
@@ -12,7 +12,9 @@
 // ==/UserScript==
 
 function createFxZhihuButton(link) {
+    const previewLink = link.replace('.zhihu.com', '.fxzhihu.com');
     const button = document.createElement('a');
+  
     button.textContent = '复制预览链接';
     button.className = 'fxzhihu-button';
     button.style.cssText = `
@@ -27,15 +29,22 @@ function createFxZhihuButton(link) {
         text-decoration: none;
         transition: all 0.3s ease;
     `;
+
+    // 关键：右键“在新标签页中打开链接”会打开这个 href
+    button.href = previewLink;
+    button.target = '_blank';
+    button.rel = 'noopener noreferrer';
+
+    // 左键仍然只复制，不跳转
     button.addEventListener('click', (e) => {
         e.preventDefault();
-        navigator.clipboard.writeText(link.replace('.zhihu.com', '.fxzhihu.com'));
+        navigator.clipboard.writeText(previewLink);
         button.textContent = '已复制';
         setTimeout(() => {
             button.textContent = '复制预览链接';
         }, 1000);
     });
-    button.href = 'javascript:void(0)';
+
     return button;
 }
 
