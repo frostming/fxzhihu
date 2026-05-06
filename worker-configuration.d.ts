@@ -4,6 +4,7 @@ interface Env {
 	API_URL: string;
 	ARTICLE_URL: string;
 	ZSE_CK: string;
+	D_C0: string;
   Z_C0: string;
   ENABLE_PROXY: string;
 }

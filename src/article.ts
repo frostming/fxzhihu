@@ -1,4 +1,5 @@
 import { createTemplate, extractReference, fetchWithCache, fixImagesAndLinks, KeysToCamelCase, stripHtmlTags } from "./lib";
+import { buildZhihuCookie, getCookieValue, getSignedZhihuHeaders } from "./zhihu-sign";
 
 type IArticle = {
   title: string;
@@ -149,10 +150,14 @@ async function parseHTML(text: string, id: string) {
 
 export async function article(id: string, redirect: boolean, env: Env): Promise<string> {
   const url = new URL(id, `https://www.zhihu.com/api/v4/articles/`).href;
+  const cookie = buildZhihuCookie(env);
+  const dC0 = getCookieValue(cookie, 'd_c0');
+  const signedHeaders = dC0 ? getSignedZhihuHeaders(url, dC0) : {};
   const response = await fetchWithCache(url, {
-    "headers": {
-      "user-agent": "node",
-      "cookie": `z_c0=${env.Z_C0}`,
+    headers: {
+      "user-agent": "Mozilla/5.0",
+      ...(cookie ? { cookie } : {}),
+      ...signedHeaders,
     },
   });
   const articleData = await response.json() as IArticle;

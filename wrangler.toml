@@ -10,6 +10,9 @@ routes = [
 ]
 
 # wrangler.toml (wrangler v3.88.0^)
+[observability]
+enabled = true
+
 [observability.logs]
 enabled = true
 
