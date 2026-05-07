@@ -30,8 +30,7 @@ const ROUND_KEYS = [
 ].map(key => key >>> 0);
 
 const SHUFFLED_B64 = '6fpLRqJO8M/c3jnYxFkUVC4ZIG12SiH=5v0mXDazWBTsuw7QetbKdoPyAl+hN9rgE';
-const IV_KEY = [0x13, 0x1a, 0x1f, 0x19, 0x4c, 0x1d, 0x4e, 0x1b, 0x1f, 0x4f, 0x1a, 0x1b, 0x4e, 0x1d];
-const POST_XOR_CONST = [232, 0, 0, 2, 128, 192, 0, 8, 14, 0, 0, 0];
+const ENCRYPT_KEY = '059053f7d15e01d7';
 
 function asciiBytes(text: string): Uint8Array {
   const bytes = new Uint8Array(text.length);
@@ -123,88 +122,59 @@ function sm4CbcEncrypt(plaintext: Uint8Array, iv: Uint8Array): Uint8Array {
   return encrypted;
 }
 
-function secureRandomByte(): number {
-  const random = new Uint8Array(1);
-  crypto.getRandomValues(random);
-  return random[0];
+function encodeUriComponentBytes(text: string): Uint8Array {
+  return asciiBytes(encodeURIComponent(text));
 }
 
-function permuteRandomByte(value: number): number {
-  const limited = value & 0x7f;
-  const low = limited & 0x1f;
-  return (limited & ~0x1f) | (((~low & 0x18) | (low & 0x04) | ((low ^ 2) & 0x03)) & 0x1f);
-}
-
-function buildIvBlock(input: Uint8Array, randomByte: number): Uint8Array {
-  const block = new Uint8Array(16);
-  block[0] = randomByte;
-  block[1] = 0x15;
-
-  const dataLength = Math.min(input.length, 14);
-  const padByte = 14 - dataLength;
-  for (let i = 0; i < 14; i++) {
-    const value = i < dataLength ? input[i] : padByte;
-    block[i + 2] = value ^ IV_KEY[i];
+function shuffledBase64Encode(bytes: Uint8Array): string {
+  const remainder = bytes.length % 3;
+  const input = remainder === 0 ? bytes : new Uint8Array(bytes.length + 3 - remainder);
+  if (input !== bytes) {
+    input.set(bytes);
   }
 
-  return block;
-}
-
-function reverseBytes(bytes: Uint8Array): Uint8Array {
-  const reversed = new Uint8Array(bytes.length);
-  for (let i = 0; i < bytes.length; i++) {
-    reversed[i] = bytes[bytes.length - i - 1];
-  }
-  return reversed;
-}
-
-function encodeTriplets(input: Uint8Array): Uint8Array {
-  const output = new Uint8Array(input.length);
-
-  for (let offset = 0; offset < input.length; offset += 3) {
-    const b0 = input[offset];
-    const b1 = input[offset + 1];
-    const b2 = input[offset + 2];
-    output[offset] = (((b0 & 0x3f) << 2) | ((b1 >>> 2) & 0x03)) & 0xff;
-    output[offset + 1] = (((b1 & 0x03) << 6) | ((b0 >>> 6) << 4) | ((b2 & 0x03) << 2) | (b1 >>> 6)) & 0xff;
-    output[offset + 2] = (((b1 & 0x30) << 2) | ((b2 >>> 2) & 0x3f)) & 0xff;
-  }
-
-  return output;
-}
-
-function shuffledBase64Encode(input: Uint8Array): string {
   let result = '';
+  let maskOffset = 0;
 
-  for (let i = 0; i < input.length; i += 3) {
-    const b0 = input[i];
-    const b1 = i + 1 < input.length ? input[i + 1] : 0;
-    const b2 = i + 2 < input.length ? input[i + 2] : 0;
-    result += SHUFFLED_B64[b0 >>> 2];
-    result += SHUFFLED_B64[((b0 & 0x03) << 4) | (b1 >>> 4)];
-    result += SHUFFLED_B64[((b1 & 0x0f) << 2) | (b2 >>> 6)];
-    result += SHUFFLED_B64[b2 & 0x3f];
+  for (let offset = input.length - 1; offset >= 0; offset -= 3) {
+    let value = 0;
+    for (let i = 0; i < 3; i++) {
+      const mask = (58 >>> (8 * (maskOffset % 4))) & 0xff;
+      value |= ((input[offset - i] ^ mask) & 0xff) << (8 * i);
+      maskOffset++;
+    }
+
+    result += SHUFFLED_B64[value & 0x3f];
+    result += SHUFFLED_B64[(value >>> 6) & 0x3f];
+    result += SHUFFLED_B64[(value >>> 12) & 0x3f];
+    result += SHUFFLED_B64[(value >>> 18) & 0x3f];
   }
 
   return result;
 }
 
 function zhihuEncrypt(md5Hex: string): string {
-  const input = asciiBytes(md5Hex);
-  const iv = sm4EncryptBlock(buildIvBlock(input.slice(0, 14), permuteRandomByte(secureRandomByte() % 127)));
-  const tail = input.slice(14);
-  const cipherText = tail.length > 0 ? sm4CbcEncrypt(pkcs7Pad(tail), iv) : new Uint8Array();
-  const combined = new Uint8Array(cipherText.length + iv.length);
-  combined.set(reverseBytes(cipherText), 0);
-  combined.set(reverseBytes(iv), cipherText.length);
+  const encodedInput = encodeUriComponentBytes(md5Hex);
+  const plaintext = new Uint8Array(2 + encodedInput.length);
+  plaintext[0] = 210;
+  plaintext[1] = 0;
+  plaintext.set(encodedInput, 2);
 
-  const encoded = encodeTriplets(combined);
-  const raw = new Uint8Array(encoded.length);
-  for (let i = 0; i < encoded.length; i++) {
-    raw[i] = encoded[i] ^ POST_XOR_CONST[i % POST_XOR_CONST.length];
+  const padded = pkcs7Pad(plaintext);
+  const key = asciiBytes(ENCRYPT_KEY);
+  const firstBlock = padded.slice(0, 16);
+  for (let i = 0; i < firstBlock.length; i++) {
+    firstBlock[i] = firstBlock[i] ^ key[i] ^ 42;
   }
 
-  return shuffledBase64Encode(raw);
+  const firstCipherBlock = sm4EncryptBlock(firstBlock);
+  const cipherText = new Uint8Array(padded.length);
+  cipherText.set(firstCipherBlock);
+  if (padded.length > 16) {
+    cipherText.set(sm4CbcEncrypt(padded.slice(16), firstCipherBlock), 16);
+  }
+
+  return shuffledBase64Encode(cipherText);
 }
 
 function add32(a: number, b: number): number {
@@ -304,13 +274,30 @@ function md5(text: string): string {
 
 export function getSignedZhihuHeaders(url: string, dC0: string): Record<string, string> {
   const parsed = new URL(url);
-  const source = [ZSE_93, parsed.pathname + parsed.search, dC0].join('+');
+  const source = [ZSE_93, parsed.pathname + parsed.search, normalizeCookieValue(dC0)].join('+');
   return {
     'x-api-version': '3.0.91',
     'x-zse-93': ZSE_93,
     'x-zse-96': ZSE_96_PREFIX + zhihuEncrypt(md5(source)),
+    'x-requested-with': 'fetch',
     'x-app-za': 'OS=Web',
   };
+}
+
+function normalizeCookieValue(value: string): string {
+  let normalized = value.trim();
+  try {
+    normalized = decodeURIComponent(normalized);
+  } catch {
+    // Keep the original value if it is not percent-encoded.
+  }
+  if (normalized.startsWith('%22') && normalized.endsWith('%22')) {
+    normalized = normalized.slice(3, -3);
+  }
+  if (normalized.startsWith('"') && normalized.endsWith('"')) {
+    normalized = normalized.slice(1, -1);
+  }
+  return normalized;
 }
 
 export function getCookieValue(cookie: string, key: string): string {
@@ -325,7 +312,11 @@ function normalizeCookiePart(name: string, value?: string): string | undefined {
   if (!value) return undefined;
   const trimmed = value.trim();
   if (!trimmed) return undefined;
-  return trimmed.includes('=') ? trimmed : `${name}=${trimmed}`;
+  if (trimmed.includes(';')) return trimmed;
+  if (trimmed.startsWith(`${name}=`)) {
+    return `${name}=${normalizeCookieValue(trimmed.slice(name.length + 1))}`;
+  }
+  return `${name}=${normalizeCookieValue(trimmed)}`;
 }
 
 export function buildZhihuCookie(env: Env): string {
