@@ -190,7 +190,11 @@ const videoContentTemplate = createTemplate`
 
 export async function status(id: string, redirect: boolean, env: Env): Promise<string> {
   const url = new URL(id, `https://www.zhihu.com/api/v4/pins/`).href;
-  const response = await fetchWithCache(url);
+  const response = await fetchWithCache(url, {
+    headers: {
+      "user-agent": "Mozilla/5.0",
+    },
+  });
   const data = await response.json<Status>();
   const createdTime = new Date(data.created * 1000);
   const updatedTime = new Date(data.updated * 1000);
