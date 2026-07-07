@@ -1,4 +1,4 @@
-import { fixImagesAndLinks, createTemplate, extractReference, fetchWithCache } from './lib';
+import { fixImagesAndLinks, createTemplate, extractReference, fetchOrThrow } from './lib';
 
 const ZHIHU_HOST = 'https://www.zhihu.com';
 
@@ -190,7 +190,7 @@ const videoContentTemplate = createTemplate`
 
 export async function status(id: string, redirect: boolean, env: Env): Promise<string> {
   const url = new URL(id, `https://www.zhihu.com/api/v4/pins/`).href;
-  const response = await fetchWithCache(url, {
+  const response = await fetchOrThrow(url, {
     headers: {
       "user-agent": "Mozilla/5.0",
     },

@@ -1,4 +1,4 @@
-import { createTemplate, fetchWithCache, KeysToCamelCase } from "./lib";
+import { createTemplate, fetchOrThrow, KeysToCamelCase } from "./lib";
 
 export type Question = {
   type: 'question';
@@ -84,7 +84,7 @@ async function parseHTML(text: string, id: string) {
 
 export async function question(id: string, redirect: boolean, env: Env): Promise<string> {
   const url = `https://www.zhihu.com/api/v4/questions/${id}?include=detail,excerpt,author,answer_count`;
-  const response = await fetchWithCache(url, {
+  const response = await fetchOrThrow(url, {
     "headers": {
       "user-agent": "node",
       // "cookie": `__zse_ck=${env.ZSE_CK}`,

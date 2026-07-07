@@ -1,7 +1,7 @@
 #:schema node_modules/wrangler/config-schema.json
 name = "fxzhihu"
 main = "src/index.ts"
-compatibility_date = "2023-05-18"
+compatibility_date = "2026-07-07"
 compatibility_flags = ["nodejs_compat"]
 
 routes = [
@@ -9,7 +9,9 @@ routes = [
     { pattern = "zhuanlan.fxzhihu.com", custom_domain = true },
 ]
 
-# wrangler.toml (wrangler v3.88.0^)
+[cache]
+enabled = true
+
 [observability]
 enabled = true
 

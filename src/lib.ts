@@ -268,29 +268,13 @@ export function renderSegments(segments: Segment<SegmentType>[]): string {
   }).join('');
 }
 
-export async function fetchWithCache(url: RequestInfo, init?: RequestInit): Promise<Response> {
-  const cache = caches.default;
-  let response = await cache.match(url);
-
-  if (!response) {
-    response = await fetch(url, init);
-    if (!response.ok) {
-      throw new FetchError(response.statusText, response);
-    }
-    // Cache the response with a 100 day expiration
-    const responseToCache = response.clone();
-    const newResponse = new Response(responseToCache.body, {
-      status: responseToCache.status,
-      statusText: responseToCache.statusText,
-      headers: {
-        ...Object.fromEntries(responseToCache.headers.entries()),
-        'Cache-Control': 's-maxage=8640000'
-      }
-    });
-    await cache.put(url, newResponse);
+export async function fetchOrThrow(url: RequestInfo, init?: RequestInit): Promise<Response> {
+  const response = await fetch(url, init);
+  if (!response.ok) {
+    throw new FetchError(response.statusText, response);
   }
   return response;
-};
+}
 
 type toCamelCase<S extends string> = S extends `${infer T}_${infer U}` ? `${T}${Capitalize<toCamelCase<U>>}` : S;
 export type KeysToCamelCase<T> = {

@@ -19,6 +19,28 @@ import { status } from './status';
 import { TransformUrl } from './lib';
 
 const GITHUB_REPO = 'https://github.com/frostming/fxzhihu';
+const PAGE_CACHE_CONTROL = 'public, max-age=86400, stale-while-revalidate=604800';
+const NO_STORE_HEADERS = { 'Cache-Control': 'no-store' };
+
+function redirectWithoutCache(url: string): Response {
+  return new Response(null, {
+    status: 302,
+    headers: {
+      ...NO_STORE_HEADERS,
+      'Location': url,
+    },
+  });
+}
+
+function disableCache(response: Response): Response {
+  const headers = new Headers(response.headers);
+  headers.set('Cache-Control', 'no-store');
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
 
 export default {
   async fetch(request, env, ctx): Promise<Response> {
@@ -32,7 +54,7 @@ export default {
     }
 
     if (path === '/') {
-      return Response.redirect(GITHUB_REPO, 302);
+      return redirectWithoutCache(GITHUB_REPO);
     }
 
     if (path === '/robots.txt') {
@@ -41,7 +63,7 @@ Disallow: /
 Allow: /question/*
 Allow: /p/*
 Allow: /answer/*
-`);
+`, { headers: NO_STORE_HEADERS });
     }
 
     if (env.ENABLE_PROXY !== 'false') {
@@ -65,7 +87,9 @@ Allow: /answer/*
             }
             return new Response(await TransformUrl(responseContent, env), {
               headers: {
-                'Content-Type': 'text/html',
+                'Cache-Control': PAGE_CACHE_CONTROL,
+                'Content-Type': 'text/html; charset=utf-8',
+                'Vary': 'Referer',
               },
             });
           } catch (e: any) {
@@ -74,11 +98,14 @@ Allow: /answer/*
             if (e.response && (e.code as number) === 4041) {
               return new Response(errorPage(e), {
                 headers: {
+                  ...NO_STORE_HEADERS,
                   'Content-Type': 'text/html',
                 },
               });
             }
-            return e.response || new Response(e.message, { status: 500 });
+            return e.response
+              ? disableCache(e.response)
+              : new Response(e.message, { status: 500, headers: NO_STORE_HEADERS });
           }
         }
       }
@@ -86,6 +113,6 @@ Allow: /answer/*
 
     // Redirect to the same URL under zhihu.com
     const zhihuUrl = new URL(path, path.startsWith('/p/') ? `https://zhuanlan.zhihu.com` : `https://www.zhihu.com`).href;
-    return Response.redirect(zhihuUrl, 302);
+    return redirectWithoutCache(zhihuUrl);
   },
 } satisfies ExportedHandler<Env>;

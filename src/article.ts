@@ -1,4 +1,4 @@
-import { createTemplate, extractReference, fetchWithCache, fixImagesAndLinks, KeysToCamelCase, stripHtmlTags } from "./lib";
+import { createTemplate, extractReference, fetchOrThrow, fixImagesAndLinks, KeysToCamelCase, stripHtmlTags } from "./lib";
 import { buildZhihuCookie, getCookieValue, getSignedZhihuHeaders } from "./zhihu-sign";
 
 type IArticle = {
@@ -153,7 +153,7 @@ export async function article(id: string, redirect: boolean, env: Env): Promise<
   const cookie = buildZhihuCookie(env);
   const dC0 = getCookieValue(cookie, 'd_c0');
   const signedHeaders = dC0 ? getSignedZhihuHeaders(url, dC0) : {};
-  const response = await fetchWithCache(url, {
+  const response = await fetchOrThrow(url, {
     headers: {
       "user-agent": "Mozilla/5.0",
       ...(cookie ? { cookie } : {}),
