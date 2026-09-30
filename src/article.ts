@@ -155,7 +155,8 @@ export async function article(id: string, redirect: boolean, env: Env): Promise<
   const signedHeaders = dC0 ? getSignedZhihuHeaders(url, dC0) : {};
   const response = await fetchOrThrow(url, {
     headers: {
-      "user-agent": "Mozilla/5.0",
+      // Zhihu rejects the bare "Mozilla/5.0" user agent even with valid signed requests.
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36 Edg/154.0.0.0",
       ...(cookie ? { cookie } : {}),
       ...signedHeaders,
     },
