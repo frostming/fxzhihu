@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildZhihuCookie, getCookieValue, getSignedZhihuHeaders } from './zhihu-sign';
+import { buildZhihuCookie, getCookieValue, getSignedZhihuHeaders, getZhihuRequestHeaders } from './zhihu-sign';
 
 describe('zhihu signing helpers', () => {
   it('builds cookie headers from individual secret values', () => {
@@ -47,5 +47,27 @@ describe('zhihu signing helpers', () => {
     expect(getSignedZhihuHeaders(url, '"dc0-value"')['x-zse-96']).toBe(getSignedZhihuHeaders(url, 'dc0-value')['x-zse-96']);
     expect(getSignedZhihuHeaders(url, '%22dc0-value%22')['x-zse-96']).toBe(getSignedZhihuHeaders(url, 'dc0-value')['x-zse-96']);
     expect(getSignedZhihuHeaders(url, 'dc0%3D%7Cvalue')['x-zse-96']).toBe(getSignedZhihuHeaders(url, 'dc0=|value')['x-zse-96']);
+  });
+
+  it('signs answer requests including their query string with the configured cookies', () => {
+    const url = 'https://www.zhihu.com/api/v4/answers/554938129?include=content,excerpt,voteup_count,comment_count,question.detail';
+    const headers = getZhihuRequestHeaders(url, {
+      Z_C0: 'z_c0=login-value',
+      ZSE_CK: 'd_c0="device-value"; __zse_ck=check-value',
+    } as Env);
+
+    expect(headers.cookie).toBe('z_c0=login-value; d_c0="device-value"; __zse_ck=check-value');
+    expect(headers['user-agent']).toMatch(/Mozilla\/5\.0 .*AppleWebKit\/.*Chrome\/.*Safari\//);
+    expect(headers['x-zse-96']).toBe(getSignedZhihuHeaders(url, 'device-value')['x-zse-96']);
+    expect(headers['x-zse-96']).not.toBe(getSignedZhihuHeaders(url.split('?')[0], 'device-value')['x-zse-96']);
+    expect(headers['x-api-version']).toBe('3.0.91');
+  });
+
+  it('omits cookies and signatures when secrets are not configured', () => {
+    const headers = getZhihuRequestHeaders('https://www.zhihu.com/api/v4/answers/554938129', {} as Env);
+
+    expect(headers['user-agent']).toContain('Chrome/');
+    expect(headers).not.toHaveProperty('cookie');
+    expect(headers).not.toHaveProperty('x-zse-96');
   });
 });

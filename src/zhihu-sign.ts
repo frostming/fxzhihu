@@ -326,3 +326,14 @@ export function buildZhihuCookie(env: Env): string {
     normalizeCookiePart('__zse_ck', env.ZSE_CK),
   ].filter((part): part is string => Boolean(part)).join('; ');
 }
+
+export function getZhihuRequestHeaders(url: string, env: Env): Record<string, string> {
+  const cookie = buildZhihuCookie(env);
+  const dC0 = getCookieValue(cookie, 'd_c0');
+  return {
+    // Zhihu rejects abbreviated user agents even with valid cookies and signatures.
+    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36 Edg/154.0.0.0',
+    ...(cookie ? { cookie } : {}),
+    ...(dC0 ? getSignedZhihuHeaders(url, dC0) : {}),
+  };
+}

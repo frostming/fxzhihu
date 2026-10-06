@@ -80,7 +80,7 @@ https://greasyfork.org/zh-CN/scripts/510234-zhihu-link-fixer
 pnpm dev
 ```
 
-专栏文章接口现在需要知乎的 `d_c0` cookie 参与请求签名。部署前需要用 `wrangler secret put D_C0` 配置 `d_c0` 的值；如果 `ZSE_CK` 使用完整 cookie 字符串，代码也会从中读取 `d_c0`。
+回答和专栏文章接口使用统一的浏览器请求头，并用知乎的 `d_c0` cookie 参与请求签名。部署前需要用 `wrangler secret put D_C0` 配置 `d_c0` 的值；如果 `ZSE_CK` 使用完整 cookie 字符串，代码也会从中读取 `d_c0`。回答接口还需要有效的 `Z_C0` 登录 cookie。
 
 专栏链接是 `https://zhuanlan.zhihu.com/p/NUMBER`, 访问 <http://localhost:8787/p/NUMBER?redirect=no> 就能看到效果
 

@@ -1,5 +1,6 @@
 import { Question } from "./question";
 import { fixImagesAndLinks, createTemplate, extractReference, fetchOrThrow, KeysToCamelCase } from "./lib";
+import { getZhihuRequestHeaders } from "./zhihu-sign";
 
 type IAnswer = {
   content: string;
@@ -138,10 +139,7 @@ const questionTemplate = createTemplate`
 export async function answer(id: string, redirect: boolean, env: Env, qid: string): Promise<string> {
   const url = `https://www.zhihu.com/api/v4/answers/${id}?include=content,excerpt,voteup_count,comment_count,question.detail`;
   const response = await fetchOrThrow(url, {
-    headers: {
-      "user-agent": "node",
-      "cookie": `z_c0=${env.Z_C0}`,
-    },
+    headers: getZhihuRequestHeaders(url, env),
   });
   const answerData = await response.json() as IAnswer;
   const { question } = answerData;
